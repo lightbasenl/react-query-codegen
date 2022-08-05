@@ -1,4 +1,4 @@
-import { importSpecs } from '../lib/commonjs/importSpecs';
+import { importSpecs } from '../dist/importSpecs.js';
 
 importSpecs({
   sourceDirectory: 'test/specs',
