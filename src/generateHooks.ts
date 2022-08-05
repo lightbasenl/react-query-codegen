@@ -183,22 +183,6 @@ export const createHook = ({
 
   const isUpdateRequest = ['post', 'patch', 'put'].includes(verb);
 
-  const generateProps = (props: ParameterObject[]) => {
-    return props.map((item) => `["${item.name}"]: props["${item.name}"]`).join(',');
-  };
-
-  const generateBodyProps = () => {
-    const definitionKey = Object.keys(schemasComponents?.schemas || {}).find(
-      (key) => pascal(key) === requestBodyComponent
-    );
-    if (definitionKey) {
-      const scheme = schemasComponents?.schemas?.[definitionKey] as SchemaObject;
-      return Object.keys(scheme.properties as SchemaObject)
-        .map((item: string) => `["${item}"]: props["${item}"]`)
-        .join(',');
-    }
-  };
-
   const fetchName = camel(componentName);
 
   const createQueryHooks = (emptyParams?: boolean) => {
@@ -296,6 +280,28 @@ export const createHook = ({
 
   output += createQueryHooks(!requestBodyComponent && !paramsInPath.length && !queryParam && !headerParam);
 
+  const hasRequestBodyArrray = requestBodyComponent && requestBodyComponent.includes('[]');
+  const body = hasRequestBodyArrray ? `{body: ${requestBodyComponent}}` : `${requestBodyComponent}`;
+  const bodyProps = hasRequestBodyArrray ? `{body, ...props}` : '{props}';
+
+  const generateProps = (props: ParameterObject[]) => {
+    return props.map((item) => `["${item.name}"]: props["${item.name}"]`).join(',');
+  };
+
+  const generateBodyProps = () => {
+    const definitionKey = Object.keys(schemasComponents?.schemas || {}).find(
+      (key) => pascal(key) === requestBodyComponent
+    );
+    if (definitionKey && !hasRequestBodyArrray) {
+      const scheme = schemasComponents?.schemas?.[definitionKey] as SchemaObject;
+      const generatedBodyProps = Object.keys(scheme.properties as SchemaObject)
+        .map((item: string) => `["${item}"]: props["${item}"]`)
+        .join(',');
+      return `const body = {${generatedBodyProps}}`;
+    }
+    return '';
+  };
+
   if (!requestBodyComponent && !paramsInPath.length && !queryParam && !headerParam) {
     output += `
     const ${fetchName} = async () => {
@@ -386,22 +392,15 @@ export const createHook = ({
   }
 
   if (requestBodyComponent && !paramsInPath.length && queryParam && !headerParam) {
-    const config = isUpdateRequest ? 'null,{headers, params: queryParams}' : '{headers, params: queryParams}';
-    const queryParamsProps = queryParams.map((item) => `["${item.name}"]: props["${item.name}"]`);
     output += `
-    type ${componentName}Params = ${requestBodyComponent}  & {
-      ${queryParamsType}
-    }
+      type ${componentName}Params =  ${body} & {
+        ${queryParamsType}
+      }
 
-    type ${componentName}QueryProps<T = ${responseTypes}> = ${componentName}Params & {
-      const body =  {${generateBodyProps()}}
+     const ${fetchName} = async (${bodyProps}: ${componentName}Params) => {   
+      ${generateBodyProps()}
       const params =  {${generateProps(queryParams)}}
-      options?: UseQueryOptions<${responseTypes}, AxiosError, T, any> 
-    }
-
-     const ${fetchName} = async ({body, params}: ${componentName}Params) => {   
-      const queryParams = {${queryParamsProps.join(',')}}
-      const result = await api.${verb}<${responseTypes}>(\`${route}\`, ${config})
+      const result = await api.${verb}<${responseTypes}>(\`${route}\`, body, {params})
       return result.data
     }
     `;
@@ -409,13 +408,13 @@ export const createHook = ({
 
   if (requestBodyComponent && !paramsInPath.length && !queryParam && headerParam) {
     output += `
-    type ${componentName}Params =  ${requestBodyComponent} & {
+    type ${componentName}Params =  ${body} & {
       ${headerParam}
     };
 
-    const ${fetchName} = async (props: ${componentName}Params) => {
+    const ${fetchName} = async (${bodyProps}: ${componentName}Params) => {
+      ${generateBodyProps()}
       const headers = {${generateProps(header)}}
-      const body =  {${generateBodyProps()}}
       const result = await api.${verb}<${responseTypes}>(\`${route}\`, body, {headers})
       return result.data
     }
@@ -424,13 +423,13 @@ export const createHook = ({
 
   if (requestBodyComponent && !paramsInPath.length && queryParam && headerParam) {
     output += `
-    type ${componentName}Params = ${requestBodyComponent} & {
+    type ${componentName}Params = ${body} & {
       ${headerParam}
       ${paramsTypes}
     };
 
-    const ${fetchName} = async (props: ${componentName}Params) => {
-      const body =  {${generateBodyProps()}}
+    const ${fetchName} = async (${bodyProps}: ${componentName}Params) => {
+      ${generateBodyProps()}
       const headers = {${generateProps(header)}}
       const params =  {${generateProps(queryParams)}}
       const result = await api.${verb}<${responseTypes}>(\`${route}\`, body, {headers, params})
@@ -441,13 +440,13 @@ export const createHook = ({
 
   if (requestBodyComponent && paramsInPath.length && !queryParam && !headerParam) {
     output += `
-    type ${componentName}Params = ${requestBodyComponent} & {
+    type ${componentName}Params = ${body} & {
       ${headerParam}
       ${paramsTypes}
     };
 
-    const ${fetchName} = async (props: ${componentName}Params) => {
-      const body =  {${generateBodyProps()}}
+    const ${fetchName} = async (${bodyProps}: ${componentName}Params) => {
+      ${generateBodyProps()}
       const result = await api.${verb}<${responseTypes}>(\`${route.replace(/\{/g, '{props.')}\`, body)
       return result.data
     }
