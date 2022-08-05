@@ -1,3 +1,10 @@
+## 1.0.5 (2022-08-05)
+
+
+### Bug Fixes
+
+* handle array schema type for body parameter 66144fc
+
 ## 1.0.4 (2022-08-05)
 
 
