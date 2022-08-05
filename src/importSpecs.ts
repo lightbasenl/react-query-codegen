@@ -1,3 +1,4 @@
+import Case from 'case';
 import chalk from 'chalk';
 import { readFileSync, writeFileSync, readdir, mkdirSync } from 'fs';
 import { OperationObject, PathItemObject } from 'openapi3-ts';
@@ -37,8 +38,9 @@ export function importSpecs({
         const format = ['.yaml', '.yml'].includes(ext.toLowerCase()) ? 'yaml' : 'json';
         let spec = await convertSwaggerFile(data, format);
 
-        const schemaName = `useQueries${filename.split('.')[0]}.schema`;
-        const hooksName = `useQueries${filename.split('.')[0]}`;
+        const formattedFileName = Case.camel(`useQueries, ${filename.split('.')[0]}`);
+        const schemaName = `${formattedFileName}.schema`;
+        const hooksName = `${formattedFileName}`;
         const name = filename.split('.')[0];
         mkdirSync(join(process.cwd(), `${exportDirectory}/${name}`), { recursive: true });
 
