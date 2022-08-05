@@ -1,21 +1,19 @@
 {
-  "include": ["src", "types"],
+  "include": ["src/**/*", "types"],
   "compilerOptions": {
-    "module": "node16",
-    "moduleResolution": "node16",
-
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
-    "outDir": "./lib/esm",
-    "rootDir": "./src",
     "esModuleInterop": true,
     "isolatedModules": false,
     "jsx": "react-native",
     "lib": ["es2021"],
+    "module": "node16",
+    "moduleResolution": "node16",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "pretty": true,
     "resolveJsonModule": true,
+    "rootDir": "./src",
     "skipLibCheck": true,
     "strict": true,
     "target": "esnext"

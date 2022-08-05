@@ -6,7 +6,11 @@
   "type": "module",
   "exports": "./src/index.js",
   "files": [
-    "lib/"
+    "src",
+    "lib",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__"
   ],
   "keywords": [
     "rest",
@@ -36,13 +40,13 @@
   "scripts": {
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "tsc": "tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
-    "test": "yarn tsc && node test/script.mjs && prettier --check ./test/generated/**/*.tsx --write && eslint ./test/generated/**/*.tsx --fix",
-    "prepare": "husky install"
+    "test": "node test/script.mjs && prettier --check ./test/generated/**/*.tsx --write && eslint ./test/generated/**/*.tsx --fix",
+    "prepare": "bob build"
   },
   "dependencies": {
     "axios": "0.27.2",
     "case": "1.6.3",
-    "chalk": "5.0.1",
+    "chalk": "4.1.2",
     "js-yaml": "4.1.0",
     "lodash": "4.17.21",
     "openapi3-ts": "2.0.2",
@@ -71,7 +75,23 @@
     "husky": "^8.0.1",
     "prettier": "2.7.1",
     "react": "17.0.2",
+    "react-native-builder-bob": "^0.18.3",
     "semantic-release": "^19.0.3",
     "typescript": "4.7.4"
-  }
+  },
+  "main": "lib/commonjs/index.js",
+  "react-native": "src/index.ts",
+  "types": "lib/typescript/src/index.d.ts",
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      "commonjs",
+      "typescript"
+    ]
+  },
+  "eslintIgnore": [
+    "node_modules/",
+    "lib/"
+  ]
 }

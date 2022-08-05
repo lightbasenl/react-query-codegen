@@ -1,4 +1,4 @@
-import { importSpecs } from '../lib/esm/importSpecs.js';
+import { importSpecs } from '../lib/commonjs/importSpecs';
 
 importSpecs({
   sourceDirectory: 'test/specs',
