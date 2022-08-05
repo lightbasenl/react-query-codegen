@@ -1,7 +1,7 @@
 {
   "name": "react-query-lightbase-codegen",
   "description": "Fully typed react query code generation tool based on openApi specifications",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "license": "MIT",
   "type": "module",
   "exports": "./src/index.js",
