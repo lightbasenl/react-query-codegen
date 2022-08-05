@@ -1,3 +1,10 @@
+## 1.0.2 (2022-08-05)
+
+
+### Bug Fixes
+
+* fix ESM build export e5f9c0a
+
 ## 1.0.1 (2022-08-05)
 
 
