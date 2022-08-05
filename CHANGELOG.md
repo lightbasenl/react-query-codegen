@@ -1,3 +1,10 @@
+## 1.0.6 (2022-08-05)
+
+
+### Bug Fixes
+
+* esnure files created are camel case 07f8813
+
 ## 1.0.5 (2022-08-05)
 
 
