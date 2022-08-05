@@ -38,6 +38,7 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "tsc": "tsc -p tsconfig.json",
     "test": "yarn tsc && node test/script.mjs && prettier --check ./test/generated/**/*.tsx --write && eslint ./test/generated/**/*.tsx --fix",
+    "deploy": "tsc && semantic-release --no-ci",
     "prepare": "husky install"
   },
   "dependencies": {
