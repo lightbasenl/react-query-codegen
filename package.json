@@ -6,7 +6,8 @@
   "type": "module",
   "exports": "./dist/index.js",
   "files": [
-    "lib/"
+    "src",
+    "dist"
   ],
   "keywords": [
     "rest",
