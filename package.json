@@ -1,0 +1,77 @@
+{
+  "name": "react-query-lightbase-codegen",
+  "description": "Fully typed react query code generation tool based on openApi specifications",
+  "version": "0.5.0",
+  "license": "MIT",
+  "type": "module",
+  "exports": "./src/index.js",
+  "files": [
+    "lib/"
+  ],
+  "keywords": [
+    "rest",
+    "client",
+    "swagger",
+    "open-api",
+    "fetch",
+    "data fetching",
+    "code-generation",
+    "react",
+    "react-query",
+    "axios",
+    "vue-query",
+    "tanstack"
+  ],
+  "author": {
+    "name": "Oliver Winter",
+    "email": "owinter86@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/owinter86/react-query-codegen"
+  },
+  "engines": {
+    "node": ">=14.16"
+  },
+  "scripts": {
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "tsc": "tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
+    "test": "yarn tsc && node test/script.mjs && prettier --check ./test/generated/**/*.tsx --write && eslint ./test/generated/**/*.tsx --fix",
+    "prepare": "husky install"
+  },
+  "dependencies": {
+    "axios": "0.27.2",
+    "case": "1.6.3",
+    "chalk": "5.0.1",
+    "js-yaml": "4.1.0",
+    "lodash": "4.17.21",
+    "openapi3-ts": "2.0.2",
+    "swagger2openapi": "7.0.8",
+    "yamljs": "0.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "7.18.10",
+    "@babel/eslint-parser": "7.17.0",
+    "@commitlint/cli": "^17.0.3",
+    "@commitlint/config-conventional": "^17.0.3",
+    "@react-native-community/eslint-config": "3.1.0",
+    "@semantic-release/changelog": "^6.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^8.0.5",
+    "@semantic-release/npm": "^9.0.1",
+    "@tanstack/react-query": "4.0.10",
+    "@types/js-yaml": "4.0.5",
+    "@types/lodash": "4.14.182",
+    "@types/node": "18.6.3",
+    "@types/qs": "6.9.7",
+    "@types/query-string": "6.3.0",
+    "@types/yamljs": "0.2.31",
+    "eslint": "8.21.0",
+    "eslint-plugin-prettier": "4.2.1",
+    "husky": "^8.0.1",
+    "prettier": "2.7.1",
+    "react": "17.0.2",
+    "semantic-release": "^19.0.3",
+    "typescript": "4.7.4"
+  }
+}
