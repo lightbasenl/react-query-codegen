@@ -108,3 +108,4 @@ test/specs-private/*
 
 
 .npmrc
+orval.config.cjs

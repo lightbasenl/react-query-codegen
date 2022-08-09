@@ -7,6 +7,7 @@ import { convertSwaggerFile } from './convertSwaggerFile.js';
 import { createHook } from './generateHooks.js';
 import { generateImports } from './generateImports.js';
 import { generateSchemas } from './generateSchemas.js';
+import execa from 'execa';
 
 export function importSpecs({
   sourceDirectory,
@@ -26,12 +27,12 @@ export function importSpecs({
     { type: 'query' } | { type: 'mutation' } | { type: 'infiniteQuery'; infiniteQueryParm: string }
   >;
 }) {
-  readdir(sourceDirectory, function (err, filenames) {
+  readdir(sourceDirectory, async (err, filenames) => {
     if (err) {
       console.log(err);
       throw err;
     }
-    filenames.map(async (filename) => {
+    filenames.forEach(async (filename) => {
       try {
         const data = readFileSync(join(process.cwd(), sourceDirectory + '/' + filename), 'utf-8');
         const { ext } = parse(sourceDirectory + '/' + filename);
@@ -94,12 +95,19 @@ export function importSpecs({
 
         writeFileSync(join(process.cwd(), `${exportDirectory}/${name}/${hooksName}.tsx`), imports + hooks);
 
-        const schemas = generateSchemas({ spec });
-        writeFileSync(join(process.cwd(), `${exportDirectory}/${name}/${schemaName}.tsx`), schemas);
-
+        writeFileSync(
+          join(process.cwd(), `${exportDirectory}/${name}/${schemaName}.tsx`),
+          generateSchemas({ spec })
+        );
         console.log(
           chalk.green(`🎉 [${filename}] Your OpenAPI spec has been converted into react query hooks`)
         );
+        try {
+          execa.sync('prettier', ['--write', `./${exportDirectory}/${name}/*.tsx`]);
+          console.log(chalk.blue(`⚙️  Running prettier`));
+        } catch (e) {
+          console.log(chalk.yellow(`⚠️  Prettier not found`));
+        }
       } catch (error) {
         if ((error as any).code === 'EISDIR') {
           console.log(chalk.red('nested folder structure not supported'));
