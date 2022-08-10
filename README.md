@@ -53,7 +53,7 @@ importSpecs({
 To generate the code generated scheme and react query hooks run the above script
 
 ```bash
-node scripts/generateQueries.mjs && prettier --check ./src/generated/*.tsx --write
+node scripts/generateQueries.mjs
 ```
 
 ## Configuration Options
