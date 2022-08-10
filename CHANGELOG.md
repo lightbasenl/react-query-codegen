@@ -1,3 +1,10 @@
+## 1.1.0 (2022-08-10)
+
+
+### Features
+
+* add prettier support on import spec cb9c3a6
+
 ## 1.0.6 (2022-08-05)
 
 
