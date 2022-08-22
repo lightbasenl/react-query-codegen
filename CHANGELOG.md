@@ -1,3 +1,10 @@
+## 1.1.1 (2022-08-22)
+
+
+### Bug Fixes
+
+* fix lib build distribution 4cefe63
+
 ## 1.1.0 (2022-08-10)
 
 
