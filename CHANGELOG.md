@@ -1,3 +1,10 @@
+## 1.1.2 (2022-08-22)
+
+
+### Bug Fixes
+
+* update github action workflow c185ef1
+
 ## 1.1.1 (2022-08-22)
 
 
