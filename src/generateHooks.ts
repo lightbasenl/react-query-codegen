@@ -190,9 +190,10 @@ export const createHook = ({
     const key = emptyParams ? '' : `params`;
     const mutationParams = emptyParams ? 'void' : `${componentName}Params`;
     const queryParamType = emptyParams ? '' : `${componentName}Params &`;
-    const filterParams = emptyParams
-      ? '{ filters }: { filters?: QueryFilters }'
+    const filterProps = emptyParams
+      ? 'props?: { filters?: QueryFilters }'
       : `{ params, filters }: { params: ${componentName}Params, filters?: QueryFilters }`;
+    const filterParams = emptyParams ? 'props?.filters' : `filters`;
     const cacheParams = emptyParams
       ? `{updater, options}: {updater: Updater<${responseTypes} | undefined, ${responseTypes} | undefined>, options?: SetDataOptions | undefined}`
       : `{params, updater, options}: {params: ${componentName}Params, updater: Updater<${responseTypes} | undefined, ${responseTypes} | undefined>, options?: SetDataOptions | undefined}`;
@@ -217,9 +218,9 @@ export const createHook = ({
   
     use${componentName}Query.updateCache = (${cacheParams}) => queryClient.setQueryData<${responseTypes}>(use${componentName}Query.queryKey(${key}), updater, options);
     
-    use${componentName}Query.getQueryState = (${filterParams})=> queryClient.getQueryState<${responseTypes}>(use${componentName}Query.queryKey(${key}), filters);
+    use${componentName}Query.getQueryState = (${filterProps})=> queryClient.getQueryState<${responseTypes}>(use${componentName}Query.queryKey(${key}), ${filterParams});
     
-    use${componentName}Query.getQueryData = (${filterParams})=> queryClient.getQueryData<${responseTypes}>(use${componentName}Query.queryKey(${key}), filters);
+    use${componentName}Query.getQueryData = (${filterProps})=> queryClient.getQueryData<${responseTypes}>(use${componentName}Query.queryKey(${key}), ${filterParams});
     
     use${componentName}Query.prefetch = (${params}) => queryClient.prefetchQuery<${responseTypes}>(use${componentName}Query.queryKey(${key}), ()=> ${fetchName}(${key}));
   
