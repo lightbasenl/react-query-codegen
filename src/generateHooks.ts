@@ -200,12 +200,15 @@ export const createHook = ({
       ? `use${componentName}Query.baseKey()`
       : `[...use${componentName}Query.baseKey(), params]`;
 
+    const props = emptyParams ? `props?:` : `{ options = {}, ...params }:`;
+    const options = emptyParams ? `...props?.options:` : `...options`;
+
     const createQuery = () => `
     type ${componentName}QueryProps<T = ${responseTypes}> = ${queryParamType} {
       options?: UseQueryOptions<${responseTypes}, AxiosError, T, any> 
     }
-    export function use${componentName}Query<T = ${responseTypes}>({ options = {}, ...params }: ${componentName}QueryProps<T>) { 
-      return useQuery(use${componentName}Query.queryKey(${key}), async () => ${fetchName}(${key}), { enabled: ${enabledParam}, ...options });
+    export function use${componentName}Query<T = ${responseTypes}>(${props}: ${componentName}QueryProps<T>) { 
+      return useQuery(use${componentName}Query.queryKey(${key}), async () => ${fetchName}(${key}), { enabled: ${enabledParam}, ${options} });
     }
 
     use${componentName}Query.baseKey = (): QueryKey => ["${componentName.toLowerCase()}"];
