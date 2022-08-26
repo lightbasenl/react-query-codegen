@@ -200,7 +200,7 @@ export const createHook = ({
       ? `use${componentName}Query.baseKey()`
       : `[...use${componentName}Query.baseKey(), params]`;
 
-    const props = emptyParams ? `props?:` : `{ options = {}, ...params }:`;
+    const props = emptyParams ? `props?` : `{ options = {}, ...params }`;
     const options = emptyParams ? `...props?.options:` : `...options`;
 
     const createQuery = () => `
