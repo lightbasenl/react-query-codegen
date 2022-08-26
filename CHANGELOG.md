@@ -1,3 +1,10 @@
+## 1.1.6 (2022-08-26)
+
+
+### Bug Fixes
+
+* fix post requests with empty request body 6785000
+
 ## 1.1.5 (2022-08-26)
 
 
