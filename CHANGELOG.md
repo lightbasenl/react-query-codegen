@@ -1,3 +1,10 @@
+## 1.1.4 (2022-08-26)
+
+
+### Bug Fixes
+
+* fix error in output for useQuery generation a6268b4
+
 ## 1.1.3 (2022-08-26)
 
 
