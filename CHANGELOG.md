@@ -1,3 +1,10 @@
+## 1.1.7 (2022-08-26)
+
+
+### Bug Fixes
+
+* make filterOptions optional for empty param queries 03eeb26
+
 ## 1.1.6 (2022-08-26)
 
 
