@@ -201,14 +201,14 @@ export const createHook = ({
       : `[...use${componentName}Query.baseKey(), params]`;
 
     const props = emptyParams ? `props?` : `{ options = {}, ...params }`;
-    const options = emptyParams ? `...props?.options` : `...options`;
+    const options = emptyParams ? `props?.options` : `{ enabled: ${enabledParam}, ...options }`;
 
     const createQuery = () => `
     type ${componentName}QueryProps<T = ${responseTypes}> = ${queryParamType} {
       options?: UseQueryOptions<${responseTypes}, AxiosError, T, any> 
     }
     export function use${componentName}Query<T = ${responseTypes}>(${props}: ${componentName}QueryProps<T>) { 
-      return useQuery(use${componentName}Query.queryKey(${key}), async () => ${fetchName}(${key}), { enabled: ${enabledParam}, ${options} });
+      return useQuery(use${componentName}Query.queryKey(${key}), async () => ${fetchName}(${key}), ${options});
     }
 
     use${componentName}Query.baseKey = (): QueryKey => ["${componentName.toLowerCase()}"];
@@ -315,7 +315,7 @@ export const createHook = ({
   }
 
   if (!requestBodyComponent && paramsInPath.length && queryParam && !headerParam) {
-    const config = isUpdateRequest ? 'body,{params}' : '{params}';
+    const config = isUpdateRequest ? 'undefined,{params}' : '{params}';
     output += `
     type ${componentName}Params = {
       ${paramsTypes}
