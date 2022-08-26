@@ -1,3 +1,10 @@
+## 1.1.5 (2022-08-26)
+
+
+### Bug Fixes
+
+* fix empty param options destructuring bf6b5a5
+
 ## 1.1.4 (2022-08-26)
 
 
