@@ -286,7 +286,7 @@ export const createHook = ({
 
   const hasRequestBodyArrray = requestBodyComponent && requestBodyComponent.includes('[]');
   const body = hasRequestBodyArrray ? `{body: ${requestBodyComponent}}` : `${requestBodyComponent}`;
-  const bodyProps = hasRequestBodyArrray ? `{body, ...props}` : '{props}';
+  const bodyProps = hasRequestBodyArrray ? `{body, ...props}` : 'props';
 
   const generateProps = (props: ParameterObject[]) => {
     return props.map((item) => `["${item.name}"]: props["${item.name}"]`).join(',');
@@ -431,7 +431,6 @@ export const createHook = ({
       ${headerParam}
       ${paramsTypes}
     };
-
     const ${fetchName} = async (${bodyProps}: ${componentName}Params) => {
       ${generateBodyProps()}
       const headers = {${generateProps(header)}}
@@ -448,7 +447,7 @@ export const createHook = ({
       ${headerParam}
       ${paramsTypes}
     };
-
+// TEST1
     const ${fetchName} = async (${bodyProps}: ${componentName}Params) => {
       ${generateBodyProps()}
       const result = await api.${verb}<${responseTypes}>(\`${route.replace(/\{/g, '{props.')}\`, body)
