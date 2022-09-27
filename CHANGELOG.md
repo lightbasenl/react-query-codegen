@@ -1,3 +1,10 @@
+## 1.2.0 (2022-09-27)
+
+
+### Features
+
+* export Params types and fetch function 60b643a
+
 ## 1.1.8 (2022-09-01)
 
 
