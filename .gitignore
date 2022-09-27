@@ -1,6 +1,7 @@
 mock-backend
 dist
 .rpt2_cache
+.idea
 
 ### macOS ###
 *.DS_Store
