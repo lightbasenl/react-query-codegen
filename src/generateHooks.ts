@@ -202,14 +202,18 @@ export const createHook = ({
       : `[...use${componentName}Query.baseKey(), params]`;
 
     const props = emptyParams ? `props?` : `{ options = {}, ...params }`;
-    const options = emptyParams ? `props?.options` : `{ enabled: ${enabledParam}, ...options }`;
+    const options = emptyParams ? `...props?.options` : `enabled: ${enabledParam}, ...options`;
 
     const createQuery = () => `
     type ${componentName}QueryProps<T = ${responseTypes}> = ${queryParamType} {
       options?: UseQueryOptions<${responseTypes}, AxiosError, T, any> 
     }
     export function use${componentName}Query<T = ${responseTypes}>(${props}: ${componentName}QueryProps<T>) { 
-      return useQuery(use${componentName}Query.queryKey(${key}), async () => ${fetchName}(${key}), ${options});
+      return useQuery({
+        queryKey: use${componentName}Query.queryKey(${key}),
+        queryFn: () => ${fetchName}(${key}), 
+        ${options} 
+      });
     }
 
     use${componentName}Query.baseKey = (): QueryKey => ["${componentName.toLowerCase()}"];
@@ -250,7 +254,10 @@ export const createHook = ({
       options?: UseMutationOptions<${responseTypes}, AxiosError, ${mutationParams}, T> 
     }
     export function use${componentName}Mutation<T = ${responseTypes}>(props?: ${componentName}MutationProps<T>) { 
-      return useMutation(async (${key}) => ${fetchName}(${key}), props?.options)
+      return useMutation({
+        mutationFn: ${fetchName}, 
+        ...props?.options
+      })
     };
     `;
 
