@@ -1,3 +1,10 @@
+## 1.3.0 (2022-12-24)
+
+
+### Features
+
+* change generated queries to object syntax 5958f90
+
 ## 1.2.0 (2022-09-27)
 
 
