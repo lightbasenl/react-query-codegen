@@ -1,3 +1,10 @@
+## 1.3.1 (2024-03-25)
+
+
+### Bug Fixes
+
+* migrate to only export useQueryOptions e6f4f87
+
 ## 1.3.0 (2022-12-24)
 
 
