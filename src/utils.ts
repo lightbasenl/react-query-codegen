@@ -104,7 +104,7 @@ const getObject = (item: SchemaObject): string => {
 
   const IdentifierRegexp = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
   // Consolidation of item.properties & item.additionalProperties
-  let output = '{\n';
+  let output = '{';
   if (item.properties) {
     output += Object.entries(item.properties)
       .map(([key, prop]: [string, ReferenceObject | SchemaObject]) => {
@@ -152,45 +152,6 @@ export const formatDescription = (description?: string) => {
     .split('\n')
     .map((i) => `*  ${i}`)
     .join('\n')}\n */`;
-};
-
-/**
- * Extract responses / request types from open-api specs
- */
-export const getResReqTypes2 = (
-  responsesOrRequests: Array<[string, ResponseObject | ReferenceObject | RequestBodyObject]>
-) => {
-  return uniq(
-    responsesOrRequests.map(([_, res]) => {
-      if (!res) {
-        return;
-      }
-
-      if (isReference(res)) {
-        return getRef(res.$ref);
-      }
-
-      if (res.content) {
-        for (let contentType of Object.keys(res.content)) {
-          if (
-            contentType.startsWith('application/json') ||
-            contentType.startsWith('application/octet-stream')
-          ) {
-            const schema = res.content[contentType].schema!;
-
-            if (isReference(schema)) {
-              return getRef(schema.$ref);
-            } else {
-              return getScalar(schema);
-            }
-          }
-        }
-        return;
-      }
-
-      return;
-    })
-  ).join(' | ');
 };
 
 /**

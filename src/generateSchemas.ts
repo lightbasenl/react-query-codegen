@@ -88,6 +88,9 @@ const generateResponsesDefinition = (responses: ComponentsObject['responses'] = 
         const doc = getDocs(response);
         const type = getResReqTypes([['', response]]);
         const isEmptyInterface = type === '{}';
+        if (!type) {
+          return;
+        }
         if (isEmptyInterface) {
           return `export type RQ${pascal(name)}Response = ${type}`;
         } else if (type.includes('{') && !type.includes('|') && !type.includes('&')) {
