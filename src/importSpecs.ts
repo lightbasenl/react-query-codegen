@@ -7,25 +7,17 @@ import { convertSwaggerFile } from './convertSwaggerFile.js';
 import { createHook } from './generateHooks.js';
 import { generateImports } from './generateImports.js';
 import { generateSchemas } from './generateSchemas.js';
-import execa from 'execa';
 
 export function importSpecs({
   sourceDirectory,
   exportDirectory,
   apiDirectory,
-  queryClientDir,
   headerFilters,
-  overrides,
 }: {
   sourceDirectory: string;
   exportDirectory: string;
   apiDirectory: string;
-  queryClientDir: string;
   headerFilters?: string[];
-  overrides?: Record<
-    string,
-    { type: 'query' } | { type: 'mutation' } | { type: 'infiniteQuery'; infiniteQueryParm: string }
-  >;
 }) {
   readdir(sourceDirectory, async (err, filenames) => {
     if (err) {
@@ -61,12 +53,12 @@ export function importSpecs({
                 parameters: verbs.parameters,
                 schemasComponents: spec.components,
                 headerFilters,
-                overrides,
               });
 
               hooks += implementation;
               imports.forEach((element) => {
                 const formattedImport = element.replace('[]', '');
+
                 if (
                   !schemaImportsArray.includes(formattedImport) &&
                   element !== 'void' &&
@@ -87,7 +79,6 @@ export function importSpecs({
 
         const imports = generateImports({
           apiDirectory,
-          queryClientDir,
           schemaName,
           schemaImports: schemaImportsArray,
           queryImports: collectedQueryImports,
@@ -102,12 +93,6 @@ export function importSpecs({
         console.log(
           chalk.green(`🎉 [${filename}] Your OpenAPI spec has been converted into react query hooks`)
         );
-        try {
-          execa.sync('prettier', ['--write', `./${exportDirectory}/${name}/*.tsx`]);
-          console.log(chalk.blue(`⚙️  Running prettier`));
-        } catch (e) {
-          console.log(chalk.yellow(`⚠️  Prettier not found`));
-        }
       } catch (error) {
         if ((error as any).code === 'EISDIR') {
           console.log(chalk.red('nested folder structure not supported'));

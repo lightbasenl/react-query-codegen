@@ -157,6 +157,45 @@ export const formatDescription = (description?: string) => {
 /**
  * Extract responses / request types from open-api specs
  */
+export const getResReqTypes2 = (
+  responsesOrRequests: Array<[string, ResponseObject | ReferenceObject | RequestBodyObject]>
+) => {
+  return uniq(
+    responsesOrRequests.map(([_, res]) => {
+      if (!res) {
+        return;
+      }
+
+      if (isReference(res)) {
+        return getRef(res.$ref);
+      }
+
+      if (res.content) {
+        for (let contentType of Object.keys(res.content)) {
+          if (
+            contentType.startsWith('application/json') ||
+            contentType.startsWith('application/octet-stream')
+          ) {
+            const schema = res.content[contentType].schema!;
+
+            if (isReference(schema)) {
+              return getRef(schema.$ref);
+            } else {
+              return getScalar(schema);
+            }
+          }
+        }
+        return;
+      }
+
+      return;
+    })
+  ).join(' | ');
+};
+
+/**
+ * Extract responses / request types from open-api specs
+ */
 export const getResReqTypes = (
   responsesOrRequests: Array<[string, ResponseObject | ReferenceObject | RequestBodyObject]>
 ) => {

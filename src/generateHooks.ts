@@ -10,7 +10,6 @@ import {
 } from 'openapi3-ts';
 import { formatDescription, getResReqTypes, isReference, resolveValue } from './utils.js';
 import pasCase from 'case';
-import chalk from 'chalk';
 
 const { pascal, camel } = pasCase;
 
@@ -41,7 +40,6 @@ export const createHook = ({
   parameters,
   schemasComponents,
   headerFilters,
-  overrides,
 }: {
   operation: OperationObject;
   verb: string;
@@ -50,10 +48,6 @@ export const createHook = ({
   parameters: (ReferenceObject | ParameterObject)[] | undefined;
   schemasComponents?: ComponentsObject;
   headerFilters?: string[];
-  overrides?: Record<
-    string,
-    { type: 'query' } | { type: 'mutation' } | { type: 'infiniteQuery'; infiniteQueryParm: string }
-  >;
 }) => {
   const { operationId = route.replace('/', '') } = operation;
   if (operationId === '*') {
@@ -186,107 +180,23 @@ export const createHook = ({
   const fetchName = camel(componentName);
 
   const createQueryHooks = (emptyParams?: boolean) => {
-    const params = emptyParams ? '' : `params: ${componentName}Params,`;
     const key = emptyParams ? '' : `params`;
-    const mutationParams = emptyParams ? 'void' : `${componentName}Params`;
-    const queryParamType = emptyParams ? '' : `${componentName}Params &`;
-    const filterProps = emptyParams
-      ? 'props?: { filters?: QueryFilters }'
-      : `{ params, filters }: { params: ${componentName}Params, filters?: QueryFilters }`;
-    const filterParams = emptyParams ? 'props?.filters' : `filters`;
-    const cacheParams = emptyParams
-      ? `{updater, options}: {updater: Updater<${responseTypes} | undefined, ${responseTypes} | undefined>, options?: SetDataOptions | undefined}`
-      : `{params, updater, options}: {params: ${componentName}Params, updater: Updater<${responseTypes} | undefined, ${responseTypes} | undefined>, options?: SetDataOptions | undefined}`;
+    const queryParamType = emptyParams ? '' : `${componentName}Params`;
     const queryKey = emptyParams
-      ? `use${componentName}Query.baseKey()`
-      : `[...use${componentName}Query.baseKey(), params]`;
-
-    const props = emptyParams ? `props?` : `{ options = {}, ...params }`;
-    const options = emptyParams ? `...props?.options` : `enabled: ${enabledParam}, ...options`;
-
+      ? `["${componentName.toLowerCase()}"]`
+      : `["${componentName.toLowerCase()}", params]`;
+    const props = emptyParams ? `props?` : `params`;
+    const propTest = emptyParams ? '' : `${props}: ${queryParamType}`;
     const createQuery = () => `
-    type ${componentName}QueryProps<T = ${responseTypes}> = ${queryParamType} {
-      options?: UseQueryOptions<${responseTypes}, AxiosError, T, any> 
-    }
-    export function use${componentName}Query<T = ${responseTypes}>(${props}: ${componentName}QueryProps<T>) { 
-      return useQuery({
-        queryKey: use${componentName}Query.queryKey(${key}),
+    export function get${componentName}QueryOptions(${propTest}) { 
+      return queryOptions({
+        queryKey: ${queryKey},
         queryFn: () => ${fetchName}(${key}), 
-        ${options} 
       });
-    }
+    }`;
 
-    use${componentName}Query.baseKey = (): QueryKey => ["${componentName.toLowerCase()}"];
-  
-    use${componentName}Query.queryKey = (${params}): QueryKey => ${queryKey};
-  
-    use${componentName}Query.updateCache = (${cacheParams}) => queryClient.setQueryData<${responseTypes}>(use${componentName}Query.queryKey(${key}), updater, options);
-    
-    use${componentName}Query.getQueryState = (${filterProps})=> queryClient.getQueryState<${responseTypes}>(use${componentName}Query.queryKey(${key}), ${filterParams});
-    
-    use${componentName}Query.getQueryData = (${filterProps})=> queryClient.getQueryData<${responseTypes}>(use${componentName}Query.queryKey(${key}), ${filterParams});
-    
-    use${componentName}Query.prefetch = (${params}) => queryClient.prefetchQuery<${responseTypes}>(use${componentName}Query.queryKey(${key}), ()=> ${fetchName}(${key}));
-  
-    use${componentName}Query.cancelQueries = (${params}) => queryClient.cancelQueries(use${componentName}Query.queryKey(${key}))
-  
-    use${componentName}Query.invalidate = (${params}) => queryClient.invalidateQueries<${responseTypes}>(use${componentName}Query.queryKey(${key}));
-  
-    use${componentName}Query.refetchStale = (${params}) => queryClient.refetchQueries<${responseTypes}>(use${componentName}Query.queryKey(${key}), { stale: true });
-  `;
-
-    const getInfiniteQuery = ({ pageParam }: { pageParam: string }) => `
-    type ${componentName}QueryProps<T = ${responseTypes}> = ${queryParamType} {
-      options: UseInfiniteQueryOptions<${responseTypes}, AxiosError, T, any> 
-    }
-    export function use${componentName}Query<T = ${responseTypes}>({ options = {}, ...params }: ${componentName}QueryProps<T>) { 
-      return useInfiniteQuery(use${componentName}Query.queryKey(${key}), async ({ pageParam = 0 }) => ${fetchName}({${pageParam}: pageParam, ...params}), { enabled: ${enabledParam}, ...options });
-    }
-
-    use${componentName}Query.baseKey = (): QueryKey => ["${componentName.toLowerCase()}"];
-  
-    use${componentName}Query.queryKey = (${params}): QueryKey => ${queryKey};
-  
-  `;
-
-    const createMutation = () => `
-    type ${componentName}MutationProps<T> = {
-      options?: UseMutationOptions<${responseTypes}, AxiosError, ${mutationParams}, T> 
-    }
-    export function use${componentName}Mutation<T = ${responseTypes}>(props?: ${componentName}MutationProps<T>) { 
-      return useMutation({
-        mutationFn: ${fetchName}, 
-        ...props?.options
-      })
-    };
-    `;
-
-    const override = overrides?.[operationId];
-    if (override?.type === 'query') {
-      console.log(chalk.blue(`⚙️  [${operationId}] has been changed to a useQuery hook`));
-      queryImports.push('query');
-      return createQuery();
-    }
-
-    if (override?.type === 'mutation') {
-      queryImports.push('mutation');
-      console.log(chalk.blue(`⚙️  [${operationId}] has been changed to a useMutation hook`));
-      return createMutation();
-    }
-
-    if (override?.type === 'infiniteQuery') {
-      console.log(chalk.blue(`⚙️  [${operationId}] has been changed to a useInfiniteQuery hook`));
-      queryImports.push('infiniteQuery');
-      return getInfiniteQuery({ pageParam: override.infiniteQueryParm });
-    }
-
-    if (verb === 'get') {
-      queryImports.push('query');
-      return createQuery();
-    }
-
-    queryImports.push('mutation');
-    return createMutation();
+    queryImports.push('query');
+    return createQuery();
   };
 
   output += createQueryHooks(!requestBodyComponent && !paramsInPath.length && !queryParam && !headerParam);
@@ -303,6 +213,7 @@ export const createHook = ({
     const definitionKey = Object.keys(schemasComponents?.schemas || {}).find(
       (key) => pascal(key) === requestBodyComponent
     );
+
     if (definitionKey && !hasRequestBodyArrray) {
       const scheme = schemasComponents?.schemas?.[definitionKey] as SchemaObject;
       const generatedBodyProps = Object.keys(scheme.properties as SchemaObject)
@@ -310,6 +221,7 @@ export const createHook = ({
         .join(',');
       return `const body = {${generatedBodyProps}}`;
     }
+
     return '';
   };
 
@@ -321,7 +233,6 @@ export const createHook = ({
     }
     `;
   }
-
   if (!requestBodyComponent && paramsInPath.length && queryParam && !headerParam) {
     const config = isUpdateRequest ? 'undefined,{params}' : '{params}';
     output += `
@@ -336,7 +247,6 @@ export const createHook = ({
       return result.data;
     }`;
   }
-
   if (!requestBodyComponent && paramsInPath.length && !queryParam && !headerParam) {
     output += `
     export type ${componentName}Params = {
@@ -349,7 +259,6 @@ export const createHook = ({
     }
     `;
   }
-
   if (!requestBodyComponent && !paramsInPath.length && queryParam && !headerParam) {
     const config = isUpdateRequest ? 'null,{params}' : '{params}';
     output += `
@@ -380,7 +289,7 @@ export const createHook = ({
   if (!requestBodyComponent && !paramsInPath.length && !queryParam && headerParam) {
     const config = isUpdateRequest ? 'null,{headers}' : '{headers}';
     output += `
-      export type ${componentName}Params = {
+          export type ${componentName}Params = {
         ${headerParam}
       };
   
@@ -390,9 +299,9 @@ export const createHook = ({
       }
       `;
   }
-
   if (requestBodyComponent && !paramsInPath.length && !queryParam && !headerParam) {
     output += `
+
     export type ${componentName}Params = ${requestBodyComponent}
 
     export const ${fetchName} = async (body: ${componentName}Params) => {
@@ -401,7 +310,6 @@ export const createHook = ({
     } 
       `;
   }
-
   if (requestBodyComponent && !paramsInPath.length && queryParam && !headerParam) {
     output += `
       export type ${componentName}Params =  ${body} & {
@@ -416,7 +324,6 @@ export const createHook = ({
     }
     `;
   }
-
   if (requestBodyComponent && !paramsInPath.length && !queryParam && headerParam) {
     output += `
     export type ${componentName}Params =  ${body} & {
@@ -431,7 +338,6 @@ export const createHook = ({
     }
     `;
   }
-
   if (requestBodyComponent && !paramsInPath.length && queryParam && headerParam) {
     output += `
     export type ${componentName}Params = ${body} & {
@@ -447,7 +353,6 @@ export const createHook = ({
     }
     `;
   }
-
   if (requestBodyComponent && paramsInPath.length && !queryParam && !headerParam) {
     output += `
     export type ${componentName}Params = ${body} & {
