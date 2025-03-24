@@ -91,13 +91,27 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 				// Add path and query parameters
 				urlParams.forEach((p) => {
 					const safeName = sanitizePropertyName(p.name);
-					dataProps.push(`${safeName}: ${getTypeFromSchema(p.schema)}`);
-				});
-				queryParams.forEach((p) => {
-					const safeName = sanitizePropertyName(p.name);
-					dataProps.push(`${safeName}${p.required ? "" : "?"}: ${getTypeFromSchema(p.schema)}`);
+					const isDeprecated = "deprecated" in p && p.deprecated;
+					const hasDescription = "description" in p && p.description;
+					const desc =
+						hasDescription || isDeprecated
+							? `/**${hasDescription ? `\n* ${p.description}` : ""}${isDeprecated ? "\n* @deprecated" : ""}
+							*/\n`
+							: "";
+					dataProps.push(`${desc}${safeName}: ${getTypeFromSchema(p.schema)}`);
 				});
 
+				queryParams.forEach((p) => {
+					const safeName = sanitizePropertyName(p.name);
+					const isDeprecated = "deprecated" in p && p.deprecated;
+					const hasDescription = "description" in p && p.description;
+					const desc =
+						hasDescription || isDeprecated
+							? `\n/**${hasDescription ? `\n* ${p.description}` : ""}${isDeprecated ? "\n* @deprecated" : ""}
+							*/\n`
+							: "";
+					dataProps.push(`${desc}${safeName}${p.required ? "" : "?"}: ${getTypeFromSchema(p.schema)}`);
+				});
 				// Add request body type if it exists
 				const hasData = (parameters && parameters.length > 0) || requestBody;
 

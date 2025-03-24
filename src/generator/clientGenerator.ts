@@ -1,12 +1,5 @@
 import type { OpenAPIV3 } from "openapi-types";
-import {
-	camelCase,
-	getTypeFromSchema,
-	pascalCase,
-	sanitizePropertyName,
-	sanitizeTypeName,
-	specTitle,
-} from "../utils";
+import { camelCase, pascalCase, sanitizeTypeName, specTitle } from "../utils";
 
 export interface OperationInfo {
 	method: string;
@@ -93,35 +86,10 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 
 	const requestBodySchema = content ? resolveSchema(content, spec) : undefined;
 
-	// Build data type parts
-	const dataProps: string[] = [];
-
-	// Add path and query parameters
-	urlParams.forEach((p) => {
-		const safeName = sanitizePropertyName(p.name);
-		dataProps.push(`${safeName}: ${getTypeFromSchema(p.schema)}`);
-	});
-	queryParams.forEach((p) => {
-		const safeName = sanitizePropertyName(p.name);
-		dataProps.push(`${safeName}${p.required ? "" : "?"}: ${getTypeFromSchema(p.schema)}`);
-	});
-
 	// Add request body type if it exists
 	const hasData = (parameters && parameters.length > 0) || operation.requestBody;
 
-	let dataType = "undefined";
 	const namedType = pascalCase(operationId);
-	if (hasData) {
-		if (requestBody && dataProps.length > 0) {
-			dataType = `T.${namedType}Request & { ${dataProps.join("; ")} }`;
-		} else if (requestBody) {
-			dataType = `T.${namedType}Request`;
-		} else if (dataProps.length > 0) {
-			dataType = `{ ${dataProps.join("; ")} }`;
-		} else {
-			dataType = "Record<string, never>";
-		}
-	}
 
 	// Get response type from 2xx response
 

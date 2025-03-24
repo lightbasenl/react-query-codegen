@@ -126,7 +126,14 @@ export function getTypeFromSchema(
 							const isRequired = schema.required?.includes(key);
 							const propertyType = getTypeFromSchema(prop);
 							const safeName = sanitizePropertyName(key);
-							return `  ${safeName}${isRequired ? "" : "?"}: ${propertyType};`;
+							const isDeprecated = "deprecated" in prop && prop.deprecated;
+							const hasDescription = "description" in prop && prop.description;
+							const desc =
+								hasDescription || isDeprecated
+									? `/**${hasDescription ? `\n* ${prop.description}` : ""}${isDeprecated ? "\n* @deprecated" : ""}
+									*/\n`
+									: "";
+							return `${desc}${safeName}${isRequired ? "" : "?"}: ${propertyType};`;
 						})
 						.join("\n");
 					return `{${properties}\n}${nullable}`;
