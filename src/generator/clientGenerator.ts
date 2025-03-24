@@ -52,7 +52,8 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		const desc = "description" in responseObj ? responseObj.description : "";
 		const contentType =
 			responseObj.content?.["application/json"]?.schema ??
-			responseObj.content?.["application/ld+json"]?.schema;
+			responseObj.content?.["application/ld+json"]?.schema ??
+			responseObj.content?.["application/octet-stream"]?.schema;
 
 		const typeName = pascalCase(`${operationId}Response${code}`);
 
@@ -80,7 +81,8 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 	const content =
 		requestBody && "content" in requestBody
 			? (requestBody.content?.["application/json"]?.schema ??
-				requestBody.content?.["application/ld+json"]?.schema)
+				requestBody.content?.["application/ld+json"]?.schema ??
+				requestBody.content?.["application/octet-stream"]?.schema)
 			: undefined;
 
 	const requestBodySchema = content ? resolveSchema(content, spec) : undefined;
