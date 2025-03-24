@@ -1,79 +1,17 @@
 import type { OpenAPIV3 } from "openapi-types";
-import { sanitizePropertyName, sanitizeTypeName } from "../utils";
+import { getTypeFromSchema, pascalCase, sanitizePropertyName, sanitizeTypeName } from "../utils";
 
 interface SchemaContext {
 	schemas: { [key: string]: OpenAPIV3.SchemaObject };
 	generatedTypes: Set<string>;
 }
 
-/**
- * Converts OpenAPI schema type to TypeScript type
- */
-function getTypeFromSchema(
-	schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject,
-	context: SchemaContext
-): string {
-	if (!schema) return "any";
-
-	if ("$ref" in schema) {
-		const refType = schema.$ref.split("/").pop();
-		return sanitizeTypeName(refType as string);
-	}
-	const nullable = schema.nullable ? " | null" : "";
-
-	// Handle enum types properly
-	if (schema.enum) {
-		return schema.enum.map((e) => (typeof e === "string" ? `'${e}'` : e)).join(" | ") + nullable;
-	}
-
-	switch (schema.type) {
-		case "string":
-			if ("format" in schema && schema.format === "binary") {
-				return `string | { name?: string; type?: string; uri: string }${nullable}`;
-			}
-
-			return `string${nullable}`;
-		case "number":
-		case "integer":
-			return `number${nullable}`;
-		case "boolean":
-			return `boolean${nullable}`;
-		case "array": {
-			const itemType = getTypeFromSchema(schema.items, context);
-			return `Array<${itemType}>${nullable}`;
-		}
-		case "object":
-			if (schema.properties) {
-				const properties = Object.entries(schema.properties)
-					.map(([key, prop]) => {
-						const isRequired = schema.required?.includes(key);
-						const propertyType = getTypeFromSchema(prop, context);
-						const safeName = sanitizePropertyName(key);
-						return `  ${safeName}${isRequired ? "" : "?"}: ${propertyType};`;
-					})
-					.join("\n");
-				return `{${properties}\n}${nullable}`;
-			}
-			if (schema.additionalProperties) {
-				const valueType =
-					typeof schema.additionalProperties === "boolean"
-						? "any"
-						: getTypeFromSchema(schema.additionalProperties, context);
-				return `Record<string, ${valueType}>${nullable}`;
-			}
-			return `Record<string, any>${nullable}`;
-		default:
-			return `any${nullable}`;
-	}
-}
-
 function generateTypeDefinition(
 	name: string,
-	schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject,
-	context: SchemaContext
+	schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject
 ): string {
 	const description = !("$ref" in schema) && schema.description ? `/**\n * ${schema.description}\n */\n` : "";
-	const typeValue = getTypeFromSchema(schema, context);
+	const typeValue = getTypeFromSchema(schema);
 
 	// Use 'type' for primitives, unions, and simple types
 	// Use 'interface' only for complex objects with properties
@@ -98,7 +36,7 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 	// Generate types for all schema definitions
 	for (const [name, schema] of Object.entries(context.schemas)) {
 		if (context.generatedTypes.has(name)) continue;
-		output += generateTypeDefinition(name, schema, context);
+		output += generateTypeDefinition(name, schema);
 		context.generatedTypes.add(name);
 	}
 
@@ -110,11 +48,12 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 
 				const operationObject = operation as OpenAPIV3.OperationObject;
 				if (!operationObject) continue;
-				const operationId = `${sanitizeTypeName(operationObject.operationId || `${path.replace(/\W+/g, "_")}`)}`;
+				const { operationId: badOperationId, requestBody, responses, parameters } = operationObject;
+				const operationId = `${sanitizeTypeName(badOperationId || `${path.replace(/\W+/g, "_")}`)}`;
 
 				// Generate request body type
-				if (operationObject.requestBody) {
-					const content = (operationObject.requestBody as OpenAPIV3.RequestBodyObject).content;
+				if (requestBody) {
+					const content = (requestBody as OpenAPIV3.RequestBodyObject).content;
 					const jsonContent =
 						content["application/ld+json"] ??
 						content["application/json"] ??
@@ -122,13 +61,13 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 						content["application/octet-stream"];
 					if (jsonContent?.schema) {
 						const typeName = `${operationId}Request`;
-						output += generateTypeDefinition(typeName, jsonContent.schema as OpenAPIV3.SchemaObject, context);
+						output += generateTypeDefinition(typeName, jsonContent.schema as OpenAPIV3.SchemaObject);
 					}
 				}
 
 				// Generate response types
-				if (operationObject.responses) {
-					for (const [code, response] of Object.entries(operationObject.responses)) {
+				if (responses) {
+					for (const [code, response] of Object.entries(responses)) {
 						const responseObj = response as OpenAPIV3.ResponseObject;
 						const content =
 							responseObj.content?.["application/ld+json"] ??
@@ -136,9 +75,45 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 							responseObj.content?.["application/octet-stream"];
 						if (content?.schema) {
 							const typeName = `${operationId}Response${code}`;
-							output += generateTypeDefinition(typeName, content.schema as OpenAPIV3.SchemaObject, context);
+							output += generateTypeDefinition(typeName, content.schema as OpenAPIV3.SchemaObject);
 						}
 					}
+				}
+
+				// Build data type parts
+				const dataProps: string[] = [];
+
+				const urlParams = (parameters?.filter((p) => "in" in p && p.in === "path") ||
+					[]) as OpenAPIV3.ParameterObject[];
+				const queryParams = (parameters?.filter((p) => "in" in p && p.in === "query") ||
+					[]) as OpenAPIV3.ParameterObject[];
+
+				// Add path and query parameters
+				urlParams.forEach((p) => {
+					const safeName = sanitizePropertyName(p.name);
+					dataProps.push(`${safeName}: ${getTypeFromSchema(p.schema)}`);
+				});
+				queryParams.forEach((p) => {
+					const safeName = sanitizePropertyName(p.name);
+					dataProps.push(`${safeName}${p.required ? "" : "?"}: ${getTypeFromSchema(p.schema)}`);
+				});
+
+				// Add request body type if it exists
+				const hasData = (parameters && parameters.length > 0) || requestBody;
+
+				let dataType = "undefined";
+				const namedType = pascalCase(operationId);
+				if (hasData) {
+					if (requestBody && dataProps.length > 0) {
+						dataType = `${namedType}Request & { ${dataProps.join("; ")} }`;
+					} else if (requestBody) {
+						dataType = `${namedType}Request`;
+					} else if (dataProps.length > 0) {
+						dataType = `{ ${dataProps.join("; ")} }`;
+					} else {
+						dataType = "Record<string, never>";
+					}
+					output += `\n\nexport type ${pascalCase(operationId)}Params = ${dataType};\n\n`;
 				}
 			}
 		}

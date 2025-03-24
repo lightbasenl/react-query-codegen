@@ -52,3 +52,96 @@ export function sanitizeTypeName(name: string): string {
 export function specTitle(spec: OpenAPIV3.Document): string {
 	return camelCase(spec.info.title.toLowerCase().replace(/\s+/g, "-"));
 }
+
+/**
+ * Converts an OpenAPI schema object into a TypeScript type string.
+ *
+ * Handles:
+ * - References ($ref) by extracting the type name
+ * - Nullable types by appending "| null"
+ * - Enums by creating union types of the values
+ * - Basic types (string, number, boolean)
+ * - Binary format strings as a union with file metadata object
+ * - Arrays by recursively getting the item type
+ * - Objects with properties by creating interfaces
+ * - Objects with additionalProperties as Records
+ * - Fallback to "any" for unknown types
+ *
+ * @param param - The OpenAPI schema/parameter object to convert
+ * @returns The TypeScript type as a string
+ */
+export function getTypeFromSchema(
+	schema: OpenAPIV3.ParameterObject | OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined
+): string | undefined {
+	if (!schema) return undefined;
+	// Handle $ref by extracting the referenced type name
+	if ("$ref" in schema) {
+		const refType = schema.$ref.split("/").pop();
+		return sanitizeTypeName(refType as string);
+	}
+
+	// Add "| null" for nullable types
+	const nullable = "nullable" in schema && schema.nullable ? " | null" : "";
+
+	// Handle enums as union types
+	if ("enum" in schema && schema.enum) {
+		return schema.enum.map((e) => (typeof e === "string" ? `'${e}'` : e)).join(" | ") + nullable;
+	}
+
+	// Handle types based on the "type" property
+	if ("type" in schema) {
+		switch (schema.type) {
+			case "string":
+				// Special case for binary format strings
+				if ("format" in schema && schema.format === "binary") {
+					return `string | { name?: string; type?: string; uri: string }${nullable}`;
+				}
+				return `string${nullable}`;
+
+			case "number":
+			case "integer":
+				return `number${nullable}`;
+
+			case "boolean":
+				return `boolean${nullable}`;
+
+			case "array": {
+				// Recursively get the array item type
+				const itemType = getTypeFromSchema(schema.items);
+				return `Array<${itemType}>${nullable}`;
+			}
+
+			case "object":
+				// Handle objects with defined properties
+				if (schema.properties) {
+					const properties = Object.entries(schema.properties)
+						.map(([key, prop]) => {
+							const isRequired = schema.required?.includes(key);
+							const propertyType = getTypeFromSchema(prop);
+							const safeName = sanitizePropertyName(key);
+							return `  ${safeName}${isRequired ? "" : "?"}: ${propertyType};`;
+						})
+						.join("\n");
+					return `{${properties}\n}${nullable}`;
+				}
+
+				// Handle objects with additionalProperties
+				if (schema.additionalProperties) {
+					const valueType =
+						typeof schema.additionalProperties === "boolean"
+							? "any"
+							: getTypeFromSchema(schema.additionalProperties);
+					return `Record<string, ${valueType}>${nullable}`;
+				}
+
+				// Default object type when no properties specified
+				return `Record<string, any>${nullable}`;
+
+			default:
+				return `any${nullable}`;
+		}
+	}
+
+	// Fallback for schemas without a type
+	return "any";
+}

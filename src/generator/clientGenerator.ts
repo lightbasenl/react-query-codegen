@@ -1,6 +1,12 @@
 import type { OpenAPIV3 } from "openapi-types";
-import type { OpenAPIConfig } from "../types/config";
-import { camelCase, pascalCase, sanitizePropertyName, sanitizeTypeName, specTitle } from "../utils";
+import {
+	camelCase,
+	getTypeFromSchema,
+	pascalCase,
+	sanitizePropertyName,
+	sanitizeTypeName,
+	specTitle,
+} from "../utils";
 
 export interface OperationInfo {
 	method: string;
@@ -93,11 +99,11 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 	// Add path and query parameters
 	urlParams.forEach((p) => {
 		const safeName = sanitizePropertyName(p.name);
-		dataProps.push(`${safeName}: ${getTypeFromParam(p)}`);
+		dataProps.push(`${safeName}: ${getTypeFromSchema(p.schema)}`);
 	});
 	queryParams.forEach((p) => {
 		const safeName = sanitizePropertyName(p.name);
-		dataProps.push(`${safeName}${p.required ? "" : "?"}: ${getTypeFromParam(p)}`);
+		dataProps.push(`${safeName}${p.required ? "" : "?"}: ${getTypeFromSchema(p.schema)}`);
 	});
 
 	// Add request body type if it exists
@@ -167,38 +173,17 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		.join("\n	");
 
 	const requestParms = hasData
-		? `props: ${pascalCase(operationId)}Params & { axiosConfig?: AxiosRequestConfig; }`
+		? `props: T.${pascalCase(operationId)}Params & { axiosConfig?: AxiosRequestConfig; }`
 		: "props?: { axiosConfig?: AxiosRequestConfig }";
 
 	return `
-	${hasData ? `export type ${pascalCase(operationId)}Params = ${dataType};` : ""}
 	${jsDocLines.join("\n	")}
 	export async function ${camelCase(operationId)}(${requestParms}): Promise<${responseType}> {
 		${methodBody}
 	}`;
 }
 
-function getTypeFromParam(param: OpenAPIV3.ParameterObject): string {
-	if ("schema" in param) {
-		const schema = param.schema as OpenAPIV3.SchemaObject;
-		switch (schema.type) {
-			case "string":
-				return "string";
-			case "integer":
-			case "number":
-				return "number";
-			case "boolean":
-				return "boolean";
-			case "array":
-				return "Array<any>"; // You might want to make this more specific
-			default:
-				return "any";
-		}
-	}
-	return "any";
-}
-
-export function generateApiClient(spec: OpenAPIV3.Document, config: OpenAPIConfig): string {
+export function generateApiClient(spec: OpenAPIV3.Document): string {
 	const operations: OperationInfo[] = [];
 
 	const resolveParameters = (

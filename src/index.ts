@@ -62,7 +62,7 @@ export async function codegenerate(config: OpenAPIConfig): Promise<void> {
 			await writeFile(resolve(config.exportDir, `${title}.schema.ts`), typeDefinitions, "utf-8");
 
 			// Generate and write API client
-			const clientCode = generateApiClient(spec, config);
+			const clientCode = generateApiClient(spec);
 			await writeFile(resolve(config.exportDir, `${title}.client.ts`), clientCode, "utf-8");
 
 			// Generate and write React Query options
