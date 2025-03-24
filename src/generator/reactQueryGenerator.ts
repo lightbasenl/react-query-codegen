@@ -45,10 +45,7 @@ export const ${namedQueryOptions} = (
   const enabled = ${hasData ? `hasDefinedProps(params, ${requiredParams.join(", ")})` : "true"};
   return queryOptions({
     queryKey: ['${camelCase(operationId)}', ${hasData ? "params" : "undefined"}],
-    queryFn: enabled ? async () => {
-      const response = await apiClient.${namedQuery}(${hasData ? "params" : "undefined"}, config);
-      return response.data;
-    } : skipToken,
+    queryFn: enabled ? () => apiClient.${namedQuery}(${hasData ? "params" : "undefined"}, config) : skipToken,
   });
 };`;
 }
