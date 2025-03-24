@@ -38,7 +38,7 @@ function getTypeFromSchema(
 			return "boolean";
 		case "array": {
 			const itemType = getTypeFromSchema(schema.items, context);
-			return `Array<${sanitizeTypeName(itemType)}>`;
+			return `Array<${itemType}>`;
 		}
 		case "object":
 			if (schema.properties) {
