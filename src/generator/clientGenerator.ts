@@ -95,7 +95,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 	const hasData = (parameters && parameters.length > 0) || operation.requestBody;
 
 	let dataType = "undefined";
-	const namedType = pascalCase(operationId);
+	const namedType = operationId;
 	if (hasData) {
 		if (requestBody && dataProps.length > 0) {
 			dataType = `T.${namedType}Request & { ${dataProps.join("; ")} }`;
@@ -143,10 +143,10 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 				})
 				.join("\n			")}`
 			: "",
-		`return apiClient.${method.toLowerCase()}<${responseType}>(url, {
+		`return apiClient.${method}<${responseType}>(url, {
 			${queryParams.length > 0 ? "params: queryData," : ""}
 			${requestBody ? `data: ${isFormData ? "formData" : "bodyData"},` : ""}
-			${isFormData ? `config: { headers: { 'Content-Type': 'multipart/form-data', ...config.headers }, ...config },` : "...config"}
+			${isFormData ? `config: { headers: { 'Content-Type': 'multipart/form-data', ...config?.headers }, ...config },` : "...config"}
 		});`,
 	]
 		.filter(Boolean)
@@ -212,9 +212,11 @@ export function generateApiClient(spec: OpenAPIV3.Document, config: OpenAPIConfi
 			const operation = pathItem[method as keyof OpenAPIV3.PathItemObject] as OpenAPIV3.OperationObject;
 			if (!operation) return;
 			operations.push({
-				method: method.toUpperCase(),
+				method: method,
 				path,
-				operationId: `${method}${sanitizeTypeName(operation.operationId || `${path.replace(/\W+/g, "_")}`)}`,
+				operationId: pascalCase(
+					`${method}_${sanitizeTypeName(operation.operationId || `${path.replace(/\W+/g, "_")}`)}`
+				),
 				summary: operation.summary,
 				description: operation.description,
 				parameters: resolveParameters([...(pathItem.parameters || []), ...(operation.parameters || [])]),

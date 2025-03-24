@@ -9,7 +9,6 @@ export function camelCase(str: string): string {
 
 export function pascalCase(str: string): string {
 	return str
-		.toLowerCase()
 		.replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
 		.replace(/^[a-z]/, (c) => c.toUpperCase());
 }

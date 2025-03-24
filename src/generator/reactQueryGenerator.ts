@@ -1,5 +1,5 @@
 import type { OpenAPIV3 } from "openapi-types";
-import { camelCase, sanitizeTypeName, specTitle } from "../utils";
+import { camelCase, pascalCase, sanitizeTypeName, specTitle } from "../utils";
 import type { OperationInfo } from "./clientGenerator";
 
 function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document): string {
@@ -39,7 +39,7 @@ function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document
 
 	return `
 export const ${namedQuery}QueryOptions = (
-  ${hasData ? `params: Partial<Parameters<typeof apiClient.${namedQuery}>[0]>, config?: Partial<Parameters<typeof apiClient.${namedQuery}>[1]>` : ""}
+  ${hasData ? `params: Partial<Parameters<typeof apiClient.${namedQuery}>[0]>, config?: Partial<Parameters<typeof apiClient.${namedQuery}>[1]>` : `_: undefined, config?: Partial<Parameters<typeof apiClient.${namedQuery}>[1]>`}
 ) => {
   const enabled = ${hasData ? `hasDefinedProps(params, ${requiredParams.join(", ")})` : "true"};
   return queryOptions({
@@ -65,7 +65,9 @@ export function generateReactQuery(spec: OpenAPIV3.Document): string {
 			operations.push({
 				method: method.toUpperCase(),
 				path,
-				operationId: `${method}${sanitizeTypeName(operation.operationId || `${path.replace(/\W+/g, "_")}`)}`,
+				operationId: pascalCase(
+					`${method}_${sanitizeTypeName(operation.operationId || `${path.replace(/\W+/g, "_")}`)}`
+				),
 				summary: operation.summary,
 				description: operation.description,
 				parameters: [
