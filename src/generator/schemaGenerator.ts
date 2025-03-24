@@ -19,26 +19,28 @@ function getTypeFromSchema(
 		const refType = schema.$ref.split("/").pop();
 		return sanitizeTypeName(refType as string);
 	}
+	const nullable = schema.nullable ? " | null" : "";
 
 	// Handle enum types properly
 	if (schema.enum) {
-		return schema.enum.map((e) => (typeof e === "string" ? `'${e}'` : e)).join(" | ");
+		return schema.enum.map((e) => (typeof e === "string" ? `'${e}'` : e)).join(" | ") + nullable;
 	}
 
 	switch (schema.type) {
 		case "string":
 			if ("format" in schema && schema.format === "binary") {
-				return "string | { name?: string; type?: string; uri: string }";
+				return `string | { name?: string; type?: string; uri: string }${nullable}`;
 			}
-			return "string";
+
+			return `string${nullable}`;
 		case "number":
 		case "integer":
-			return "number";
+			return `number${nullable}`;
 		case "boolean":
-			return "boolean";
+			return `boolean${nullable}`;
 		case "array": {
 			const itemType = getTypeFromSchema(schema.items, context);
-			return `Array<${itemType}>`;
+			return `Array<${itemType}>${nullable}`;
 		}
 		case "object":
 			if (schema.properties) {
@@ -50,18 +52,18 @@ function getTypeFromSchema(
 						return `  ${safeName}${isRequired ? "" : "?"}: ${propertyType};`;
 					})
 					.join("\n");
-				return `{\n${properties}\n}`;
+				return `{${properties}\n}${nullable}`;
 			}
 			if (schema.additionalProperties) {
 				const valueType =
 					typeof schema.additionalProperties === "boolean"
 						? "any"
 						: getTypeFromSchema(schema.additionalProperties, context);
-				return `Record<string, ${valueType}>`;
+				return `Record<string, ${valueType}>${nullable}`;
 			}
-			return "Record<string, any>";
+			return `Record<string, any>${nullable}`;
 		default:
-			return "any";
+			return `any${nullable}`;
 	}
 }
 
@@ -114,9 +116,9 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 				if (operationObject.requestBody) {
 					const content = (operationObject.requestBody as OpenAPIV3.RequestBodyObject).content;
 					const jsonContent =
+						content["application/ld+json"] ??
 						content["application/json"] ??
 						content["multipart/form-data"] ??
-						content["application/ld+json"] ??
 						content["application/octet-stream"];
 					if (jsonContent?.schema) {
 						const typeName = `${operationId}Request`;
@@ -129,8 +131,8 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 					for (const [code, response] of Object.entries(operationObject.responses)) {
 						const responseObj = response as OpenAPIV3.ResponseObject;
 						const content =
-							responseObj.content?.["application/json"] ??
 							responseObj.content?.["application/ld+json"] ??
+							responseObj.content?.["application/json"] ??
 							responseObj.content?.["application/octet-stream"];
 						if (content?.schema) {
 							const typeName = `${operationId}Response${code}`;

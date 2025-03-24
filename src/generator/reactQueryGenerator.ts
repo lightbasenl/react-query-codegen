@@ -22,8 +22,8 @@ function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document
 
 	const content =
 		requestBody && "content" in requestBody
-			? (requestBody.content?.["application/json"]?.schema ??
-				requestBody.content?.["application/ld+json"]?.schema ??
+			? (requestBody.content?.["application/ld+json"]?.schema ??
+				requestBody.content?.["application/json"]?.schema ??
 				requestBody.content?.["application/octet-stream"]?.schema)
 			: undefined;
 	// Get required parameter names from both parameters and request body
