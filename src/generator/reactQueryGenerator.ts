@@ -20,11 +20,16 @@ function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document
 		return schema.required?.map((p) => `'${p}'`) || [];
 	};
 
+	const content =
+		requestBody && "content" in requestBody
+			? (requestBody.content?.["application/json"]?.schema ??
+				requestBody.content?.["application/ld+json"]?.schema)
+			: undefined;
 	// Get required parameter names from both parameters and request body
 	const requiredParams = [
 		...(parameters?.filter((p) => p.required).map((p) => `'${p.name}'`) || []),
-		...(requestBody && "content" in requestBody && requestBody.content?.["application/json"]?.schema
-			? getRequiredFields(requestBody.content["application/json"].schema, {
+		...(content
+			? getRequiredFields(content, {
 					schemas: (spec.components?.schemas as { [key: string]: OpenAPIV3.SchemaObject }) || {},
 				})
 			: []),

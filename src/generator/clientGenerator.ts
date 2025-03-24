@@ -50,7 +50,10 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		const [code, response] = responseDetails;
 		const responseObj = response as OpenAPIV3.ResponseObject;
 		const desc = "description" in responseObj ? responseObj.description : "";
-		const contentType = responseObj.content?.["application/json"]?.schema;
+		const contentType =
+			responseObj.content?.["application/json"]?.schema ??
+			responseObj.content?.["application/ld+json"]?.schema;
+
 		const typeName = pascalCase(`${operationId}Response${code}`);
 
 		if (contentType) {
@@ -74,9 +77,13 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		? resolveSchema(requestBody.content["multipart/form-data"].schema, spec)
 		: undefined;
 
-	const requestBodySchema = requestBody?.content?.["application/json"]?.schema
-		? resolveSchema(requestBody.content["application/json"].schema, spec)
-		: undefined;
+	const content =
+		requestBody && "content" in requestBody
+			? (requestBody.content?.["application/json"]?.schema ??
+				requestBody.content?.["application/ld+json"]?.schema)
+			: undefined;
+
+	const requestBodySchema = content ? resolveSchema(content, spec) : undefined;
 
 	// Build data type parts
 	const dataProps: string[] = [];
