@@ -35,7 +35,7 @@ function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document
 			: []),
 	];
 
-	const namedQueryOptions = camelCase(`get_${operationId}_Query_Options`);
+	const namedQueryOptions = `get${operationId}QueryOptions`;
 	const namedQuery = camelCase(`${method}_${operationId}`);
 
 	return `
