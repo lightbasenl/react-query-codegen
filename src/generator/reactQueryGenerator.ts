@@ -3,7 +3,7 @@ import { camelCase, pascalCase, sanitizeTypeName, specTitle } from "../utils";
 import type { OperationInfo } from "./clientGenerator";
 
 function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document): string {
-	const { operationId, parameters, requestBody } = operation;
+	const { operationId, parameters, requestBody, method } = operation;
 
 	const hasData = (parameters && parameters.length > 0) || operation.requestBody;
 
@@ -35,10 +35,11 @@ function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document
 			: []),
 	];
 
-	const namedQuery = camelCase(operationId);
+	const namedQueryOptions = camelCase(`get_${operationId}_Query_Options`);
+	const namedQuery = camelCase(`${method}_${operationId}`);
 
 	return `
-export const ${namedQuery}QueryOptions = (
+export const ${namedQueryOptions} = (
   ${hasData ? `params: Partial<Parameters<typeof apiClient.${namedQuery}>[0]>, config?: Partial<Parameters<typeof apiClient.${namedQuery}>[1]>` : `_: undefined, config?: Partial<Parameters<typeof apiClient.${namedQuery}>[1]>`}
 ) => {
   const enabled = ${hasData ? `hasDefinedProps(params, ${requiredParams.join(", ")})` : "true"};
@@ -63,9 +64,9 @@ export function generateReactQuery(spec: OpenAPIV3.Document): string {
 			const operation = pathItem[method as keyof OpenAPIV3.PathItemObject] as OpenAPIV3.OperationObject;
 			if (!operation) return;
 			operations.push({
-				method: method.toUpperCase(),
+				method: method,
 				path,
-				operationId: `${method}_${sanitizeTypeName(operation.operationId || `${path.replace(/\W+/g, "_")}`)}`,
+				operationId: `${sanitizeTypeName(operation.operationId || `${path.replace(/\W+/g, "_")}`)}`,
 				summary: operation.summary,
 				description: operation.description,
 				parameters: [
