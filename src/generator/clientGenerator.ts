@@ -143,11 +143,12 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 				})
 				.join("\n			")}`
 			: "",
-		`return apiClient.${method}<${responseType}>(url, {
+		`const res = await apiClient.${method}<${responseType}>(url, {
 			${queryParams.length > 0 ? "params: queryData," : ""}
 			${requestBody ? `data: ${isFormData ? "formData" : "bodyData"},` : ""}
 			${isFormData ? `config: { headers: { 'Content-Type': 'multipart/form-data', ...config?.headers }, ...config },` : "...config"}
-		});`,
+		});
+		return res.data;`,
 	]
 		.filter(Boolean)
 		.join("\n	");
