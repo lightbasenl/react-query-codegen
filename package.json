@@ -1,10 +1,13 @@
 {
 	"name": "react-query-lightbase-codegen",
-	"version": "2.0.5",
+	"version": "2.0.6",
 	"license": "MIT",
 	"description": "Generate Axios API clients and React Query options from OpenAPI specifications",
 	"exports": "./dist/index.js",
-	"files": ["src", "dist"],
+	"files": [
+		"src",
+		"dist"
+	],
 	"author": {
 		"name": "Oliver Winter",
 		"email": "owinter86@gmail.com"
