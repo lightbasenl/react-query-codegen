@@ -1,5 +1,3 @@
-import type { OpenAPIV3 } from "openapi-types";
-
 export function generateInstance(): string {
 	return `import type { AxiosInstance } from 'axios';
 

@@ -27,6 +27,9 @@ function getTypeFromSchema(
 
 	switch (schema.type) {
 		case "string":
+			if ("format" in schema && schema.format === "binary") {
+				return "string | { name?: string; type?: string; uri: string }";
+			}
 			return "string";
 		case "number":
 		case "integer":
