@@ -155,7 +155,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 
 	return `
 	${jsDocLines.join("\n	")}
-	export function ${camelCase(operationId)}(data${hasData ? `: ${dataType}` : "?: undefined"}, config?: AxiosRequestConfig): Promise<AxiosResponse<${responseType}>> {
+	export async function ${camelCase(operationId)}(data${hasData ? `: ${dataType}` : "?: undefined"}, config?: AxiosRequestConfig): Promise<${responseType}> {
 		${methodBody}
 	}`;
 }
