@@ -167,10 +167,11 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		.join("\n	");
 
 	const requestParms = hasData
-		? `props: ${dataType} & { axiosConfig?: AxiosRequestConfig; }`
+		? `props: ${pascalCase(operationId)}Params & { axiosConfig?: AxiosRequestConfig; }`
 		: "props?: { axiosConfig?: AxiosRequestConfig }";
 
 	return `
+	${hasData ? `export type ${pascalCase(operationId)}Params = ${dataType};` : ""}
 	${jsDocLines.join("\n	")}
 	export async function ${camelCase(operationId)}(${requestParms}): Promise<${responseType}> {
 		${methodBody}
