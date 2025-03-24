@@ -106,7 +106,7 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 				const operationObject = operation as OpenAPIV3.OperationObject;
 				if (!operationObject) continue;
 				const operationId = pascalCase(
-					`${method}_${sanitizeTypeName(operationObject.operationId || `${path.replace(/\W+/g, "_")}`)}`
+					`${sanitizeTypeName(operationObject.operationId || `${path.replace(/\W+/g, "_")}`)}`
 				);
 
 				// Generate request body type

@@ -36,7 +36,7 @@ function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document
 	];
 
 	const namedQueryOptions = `get${operationId}QueryOptions`;
-	const namedQuery = camelCase(`${method}_${operationId}`);
+	const namedQuery = camelCase(`${operationId}`);
 
 	return `
 export const ${namedQueryOptions} = (
@@ -66,7 +66,7 @@ export function generateReactQuery(spec: OpenAPIV3.Document): string {
 			operations.push({
 				method: method,
 				path,
-				operationId: `${sanitizeTypeName(operation.operationId || `${path.replace(/\W+/g, "_")}`)}`,
+				operationId: `${operation.operationId || `${path.replace(/\W+/g, "_")}`}`,
 				summary: operation.summary,
 				description: operation.description,
 				parameters: [

@@ -214,7 +214,7 @@ export function generateApiClient(spec: OpenAPIV3.Document, config: OpenAPIConfi
 			operations.push({
 				method: method,
 				path,
-				operationId: `${method}_${sanitizeTypeName(operation.operationId || `${path.replace(/\W+/g, "_")}`)}`,
+				operationId: `${sanitizeTypeName(operation.operationId || `${path.replace(/\W+/g, "_")}`)}`,
 				summary: operation.summary,
 				description: operation.description,
 				parameters: resolveParameters([...(pathItem.parameters || []), ...(operation.parameters || [])]),
