@@ -1,6 +1,7 @@
 {
-	"name": "@lightbase/react-query-codegen",
-	"version": "2.0.0",
+	"name": "react-query-lightbase-codegen",
+	"version": "1.9.0",
+	"license": "MIT",
 	"description": "Generate Axios API clients and React Query options from OpenAPI specifications",
 	"exports": "./dist/index.js",
 	"files": ["src", "dist"],
@@ -8,9 +9,22 @@
 		"name": "Oliver Winter",
 		"email": "owinter86@gmail.com"
 	},
+	"keywords": [
+		"rest",
+		"client",
+		"swagger",
+		"open-api",
+		"fetch",
+		"data fetching",
+		"code-generation",
+		"react",
+		"react-query",
+		"axios",
+		"tanstack"
+	],
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/owinter86/react-query-codegen"
+		"url": "https://github.com/lightbasenl/react-query-codegen"
 	},
 	"scripts": {
 		"build": "tsc -p tsconfig.json",
@@ -33,7 +47,7 @@
 		"typescript": "^5.7.3"
 	},
 	"peerDependencies": {
-		"@tanstack/react-query": "^5.0.0",
+		"@tanstack/react-query": ">= 5.50.0",
 		"axios": "^1.7.0"
 	}
 }

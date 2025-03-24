@@ -1,4 +1,4 @@
-# @lightbase/react-query-codegen
+# react-query-lightbase-codegen
 
 Generate type-safe Axios API clients and React Query hooks from OpenAPI specifications.
 
@@ -15,7 +15,7 @@ Generate type-safe Axios API clients and React Query hooks from OpenAPI specific
 ## Installation
 
 ```bash
-npm install @lightbase/react-query-codegen
+npm install react-query-lightbase-codegen
 ```
 
 ## Quick Start
@@ -25,7 +25,7 @@ npm install @lightbase/react-query-codegen
 Create a script to generate your API code (e.g., `scripts/generate.ts`):
 
 ```typescript
-import { codegenerate } from '@lightbase/react-query-codegen';
+import { codegenerate } from 'react-query-lightbase-codegen';
 await codegenerate({
   specSource: './specs/api.yaml', // or array of specs
   exportDir: './src/generated'
