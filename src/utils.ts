@@ -85,6 +85,13 @@ export function getTypeFromSchema(
 
 	// Handle enums as union types
 	if ("enum" in schema && schema.enum) {
+		if (Object.values(schema.enum)?.length > 0) {
+			return (
+				Object.values(schema.enum)
+					.map((e) => (typeof e === "string" ? `'${e}'` : e))
+					.join(" | ") + nullable
+			);
+		}
 		return schema.enum.map((e) => (typeof e === "string" ? `'${e}'` : e)).join(" | ") + nullable;
 	}
 
