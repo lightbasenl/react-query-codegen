@@ -115,6 +115,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 	const urlWithParams = urlParams.length > 0 ? `\`${path.replace(/{(\w+)}/g, "${data.$1}")}\`` : `"${path}"`;
 
 	const methodBody = [
+		`${hasData ? "const { axiosConfig, ...data } = props || {};" : "const { axiosConfig } = props || {};"}`,
 		"const apiClient = getApiClient();",
 		`const url = ${urlWithParams};`,
 		queryParams.length > 0
@@ -146,7 +147,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		`const res = await apiClient.${method}<${responseType}>(url, {
 			${queryParams.length > 0 ? "params: queryData," : ""}
 			${requestBody ? `data: ${isFormData ? "formData" : "bodyData"},` : ""}
-			${isFormData ? `config: { headers: { 'Content-Type': 'multipart/form-data', ...config?.headers }, ...config },` : "...config"}
+			${isFormData ? `config: { headers: { 'Content-Type': 'multipart/form-data', ...axiosConfig?.headers }, ...axiosConfig },` : "...axiosConfig"}
 		});
 		return res.data;`,
 	]
@@ -155,7 +156,9 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 
 	return `
 	${jsDocLines.join("\n	")}
-	export async function ${camelCase(operationId)}(data${hasData ? `: ${dataType}` : "?: undefined"}, config?: AxiosRequestConfig): Promise<${responseType}> {
+	export async function ${camelCase(operationId)}(props: ${
+		hasData ? `${dataType} & { axiosConfig?: AxiosRequestConfig; }` : "{ axiosConfig?: AxiosRequestConfig }"
+	} ): Promise<${responseType}> {
 		${methodBody}
 	}`;
 }

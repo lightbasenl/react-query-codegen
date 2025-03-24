@@ -39,13 +39,14 @@ function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document
 	const namedQuery = camelCase(`${operationId}`);
 
 	return `
-export const ${namedQueryOptions} = (
-  ${hasData ? `params: Partial<Parameters<typeof apiClient.${namedQuery}>[0]>, config?: Partial<Parameters<typeof apiClient.${namedQuery}>[1]>` : `_?: undefined, config?: Partial<Parameters<typeof apiClient.${namedQuery}>[1]>`}
+export const ${namedQueryOptions} = ( 
+  ${hasData ? `props: Partial<Parameters<typeof apiClient.${namedQuery}>[0]>` : `props?: Partial<Parameters<typeof apiClient.${namedQuery}>[0]>`}
 ) => {
+  ${hasData ? "const { axiosConfig, ...params } = props || {};" : "const { axiosConfig } = props || {};"}
   const enabled = ${hasData ? `hasDefinedProps(params, ${requiredParams.join(", ")})` : "true"};
   return queryOptions({
-    queryKey: ['${camelCase(operationId)}', ${hasData ? "params" : "undefined"}],
-    queryFn: enabled ? () => apiClient.${namedQuery}(${hasData ? "params" : "undefined"}, config) : skipToken,
+    queryKey: ['${camelCase(operationId)}', ${hasData ? "params" : ""}],
+    queryFn: enabled ? () => apiClient.${namedQuery}(${hasData ? "{...params, axiosConfig}" : "{axiosConfig}"}) : skipToken,
   });
 };`;
 }
