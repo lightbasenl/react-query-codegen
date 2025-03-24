@@ -154,11 +154,13 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		.filter(Boolean)
 		.join("\n	");
 
+	const requestParms = hasData
+		? `props: ${dataType} & { axiosConfig?: AxiosRequestConfig; }`
+		: "props?: { axiosConfig?: AxiosRequestConfig }";
+
 	return `
 	${jsDocLines.join("\n	")}
-	export async function ${camelCase(operationId)}(props: ${
-		hasData ? `${dataType} & { axiosConfig?: AxiosRequestConfig; }` : "{ axiosConfig?: AxiosRequestConfig }"
-	} ): Promise<${responseType}> {
+	export async function ${camelCase(operationId)}(${requestParms}): Promise<${responseType}> {
 		${methodBody}
 	}`;
 }
