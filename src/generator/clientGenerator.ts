@@ -51,7 +51,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		const responseObj = response as OpenAPIV3.ResponseObject;
 		const desc = "description" in responseObj ? responseObj.description : "";
 		const contentType = responseObj.content?.["application/json"]?.schema;
-		const typeName = `${operationId}Response${code}`;
+		const typeName = pascalCase(`${operationId}Response${code}`);
 
 		if (contentType) {
 			if (desc) {
@@ -95,7 +95,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 	const hasData = (parameters && parameters.length > 0) || operation.requestBody;
 
 	let dataType = "undefined";
-	const namedType = operationId;
+	const namedType = pascalCase(operationId);
 	if (hasData) {
 		if (requestBody && dataProps.length > 0) {
 			dataType = `T.${namedType}Request & { ${dataProps.join("; ")} }`;
@@ -112,11 +112,11 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 	const successResponse = Object.entries(responses).find(([code]) => code.startsWith("2"));
 	const responseType = successResponse ? `T.${`${namedType}Response${successResponse[0]}`}` : "any";
 
-	const urlWithParams = urlParams.length > 0 ? path.replace(/{(\w+)}/g, "${data.$1}") : path;
+	const urlWithParams = urlParams.length > 0 ? `\`${path.replace(/{(\w+)}/g, "${data.$1}")}\`` : `"${path}"`;
 
 	const methodBody = [
 		"const apiClient = getApiClient();",
-		`const url = \`${urlWithParams}\`;`,
+		`const url = ${urlWithParams};`,
 		queryParams.length > 0
 			? `const queryData = {
 				${queryParams.map((p) => `["${p.name}"]: data["${p.name}"]`).join(",\n				")}
@@ -214,9 +214,7 @@ export function generateApiClient(spec: OpenAPIV3.Document, config: OpenAPIConfi
 			operations.push({
 				method: method,
 				path,
-				operationId: pascalCase(
-					`${method}_${sanitizeTypeName(operation.operationId || `${path.replace(/\W+/g, "_")}`)}`
-				),
+				operationId: `${method}_${sanitizeTypeName(operation.operationId || `${path.replace(/\W+/g, "_")}`)}`,
 				summary: operation.summary,
 				description: operation.description,
 				parameters: resolveParameters([...(pathItem.parameters || []), ...(operation.parameters || [])]),

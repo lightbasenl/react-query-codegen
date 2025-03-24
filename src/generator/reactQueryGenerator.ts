@@ -65,9 +65,7 @@ export function generateReactQuery(spec: OpenAPIV3.Document): string {
 			operations.push({
 				method: method.toUpperCase(),
 				path,
-				operationId: pascalCase(
-					`${method}_${sanitizeTypeName(operation.operationId || `${path.replace(/\W+/g, "_")}`)}`
-				),
+				operationId: `${method}_${sanitizeTypeName(operation.operationId || `${path.replace(/\W+/g, "_")}`)}`,
 				summary: operation.summary,
 				description: operation.description,
 				parameters: [
