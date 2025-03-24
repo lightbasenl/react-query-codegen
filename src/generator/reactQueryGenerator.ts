@@ -81,6 +81,9 @@ export function generateReactQuery(spec: OpenAPIV3.Document): string {
 
 	return `import { queryOptions, skipToken } from '@tanstack/react-query';
 	import * as apiClient from './${specTitle(spec)}.client';
+	// TEMPORARY: allows for backward compatibility imports
+	export * from './${specTitle(spec)}.client';
+
 const hasDefinedProps = <T extends { [P in K]?: any }, K extends PropertyKey>(
   obj: T,
   ...keys: K[]
