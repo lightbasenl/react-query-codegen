@@ -38,7 +38,7 @@ function getTypeFromSchema(
 			return "boolean";
 		case "array": {
 			const itemType = getTypeFromSchema(schema.items, context);
-			return `Array<${itemType}>`;
+			return `Array<${sanitizeTypeName(itemType)}>`;
 		}
 		case "object":
 			if (schema.properties) {
@@ -78,8 +78,8 @@ function generateTypeDefinition(
 	const isInterface = !("$ref" in schema) && schema.type === "object" && schema.properties;
 
 	return isInterface
-		? `${description}export interface ${name} ${typeValue}\n\n`
-		: `${description}export type ${name} = ${typeValue}\n\n`;
+		? `${description}export interface ${sanitizeTypeName(name)} ${typeValue}\n\n`
+		: `${description}export type ${sanitizeTypeName(name)} = ${typeValue}\n\n`;
 }
 
 /**
@@ -108,16 +108,14 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 
 				const operationObject = operation as OpenAPIV3.OperationObject;
 				if (!operationObject) continue;
-				const operationId = pascalCase(
-					`${sanitizeTypeName(operationObject.operationId || `${path.replace(/\W+/g, "_")}`)}`
-				);
+				const operationId = `${sanitizeTypeName(operationObject.operationId || `${path.replace(/\W+/g, "_")}`)}`;
 
 				// Generate request body type
 				if (operationObject.requestBody) {
 					const content = (operationObject.requestBody as OpenAPIV3.RequestBodyObject).content;
 					const jsonContent = content["application/json"] || content["multipart/form-data"];
 					if (jsonContent?.schema) {
-						const typeName = sanitizeTypeName(`${operationId}Request`);
+						const typeName = `${operationId}Request`;
 						output += generateTypeDefinition(typeName, jsonContent.schema as OpenAPIV3.SchemaObject, context);
 					}
 				}
@@ -128,7 +126,7 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 						const responseObj = response as OpenAPIV3.ResponseObject;
 						const content = responseObj.content?.["application/json"];
 						if (content?.schema) {
-							const typeName = sanitizeTypeName(`${operationId}Response${code}`);
+							const typeName = `${operationId}Response${code}`;
 							output += generateTypeDefinition(typeName, content.schema as OpenAPIV3.SchemaObject, context);
 						}
 					}

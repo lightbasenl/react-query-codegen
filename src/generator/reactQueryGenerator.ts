@@ -1,5 +1,5 @@
 import type { OpenAPIV3 } from "openapi-types";
-import { camelCase, specTitle } from "../utils";
+import { camelCase, sanitizeTypeName, specTitle } from "../utils";
 import type { OperationInfo } from "./clientGenerator";
 
 function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document): string {
@@ -35,7 +35,7 @@ function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document
 			: []),
 	];
 
-	const namedQueryOptions = `get${operationId}QueryOptions`;
+	const namedQueryOptions = camelCase(`get${operationId}QueryOptions`);
 	const namedQuery = camelCase(`${operationId}`);
 
 	return `
@@ -64,7 +64,7 @@ export function generateReactQuery(spec: OpenAPIV3.Document): string {
 			operations.push({
 				method: method,
 				path,
-				operationId: `${operation.operationId || `${path.replace(/\W+/g, "_")}`}`,
+				operationId: sanitizeTypeName(`${operation.operationId || `${path.replace(/\W+/g, "_")}`}`),
 				summary: operation.summary,
 				description: operation.description,
 				parameters: [

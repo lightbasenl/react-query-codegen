@@ -109,8 +109,11 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 	}
 
 	// Get response type from 2xx response
-	const successResponse = Object.entries(responses).find(([code]) => code.startsWith("2"));
-	const responseType = successResponse ? `T.${`${namedType}Response${successResponse[0]}`}` : "any";
+
+	const responseType =
+		responseDetails?.[0] && "content" in responseDetails[1]
+			? `T.${`${namedType}Response${responseDetails[0]}`}`
+			: "unknown";
 
 	const urlWithParams = urlParams.length > 0 ? `\`${path.replace(/{(\w+)}/g, "${data.$1}")}\`` : `"${path}"`;
 

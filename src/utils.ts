@@ -46,7 +46,7 @@ export function sanitizePropertyName(name: string): string {
  * @returns The sanitized type name with invalid characters replaced by underscores
  */
 export function sanitizeTypeName(name: string): string {
-	return name.replace(/[^a-zA-Z0-9_]/g, "_").replace(/_+$/, "");
+	return pascalCase(name.replace(/[^a-zA-Z0-9_]/g, "_").replace(/_+$/, ""));
 }
 
 export function specTitle(spec: OpenAPIV3.Document): string {
