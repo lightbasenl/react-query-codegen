@@ -101,7 +101,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 	const urlWithParams = urlParams.length > 0 ? `\`${path.replace(/{(\w+)}/g, "${data.$1}")}\`` : `"${path}"`;
 
 	const methodBody = [
-		`${hasData ? "const { axiosConfig, ...data } = props || {};" : "const { axiosConfig } = props || {};"}`,
+		`${hasData ? "const { axiosConfig = {}, ...data } = props || {};" : "const { axiosConfig } = props || {};"}`,
 		"const apiClient = getApiClient();",
 		`const url = ${urlWithParams};`,
 		queryParams.length > 0
@@ -117,28 +117,34 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 			};`
 			: "",
 		formDataSchema?.properties
-			? `const formData = new FormData();
+			? `const bodyData = new FormData();
 			${Object.entries(formDataSchema.properties)
 				.map(([key, prop]) => {
 					const schemaProperty = prop as OpenAPIV3.SchemaObject;
 					const isBinary = schemaProperty.format === "binary";
 					return formDataSchema?.required?.includes(key)
-						? `formData.append("${key}", ${isBinary ? "" : "String("}${queryParams.length > 0 ? "bodyData" : "data"}.${key}${isBinary ? "" : ")"});`
+						? `bodyData.append("${key}", ${isBinary ? "" : "String("}${queryParams.length > 0 ? "bodyData" : "data"}.${key}${isBinary ? "" : ")"});`
 						: `if (${queryParams.length > 0 ? "bodyData" : "data"}.${key} != null) {
-							formData.append("${key}", ${isBinary ? "" : "String("}${queryParams.length > 0 ? "bodyData" : "data"}.${key}${isBinary ? "" : ")"});
+							bodyData.append("${key}", ${isBinary ? "" : "String("}${queryParams.length > 0 ? "bodyData" : "data"}.${key}${isBinary ? "" : ")"});
 						}`;
 				})
 				.join("\n			")}`
 			: "",
-		`const res = await apiClient.${method}<${responseType}>(url, {
-			${queryParams.length > 0 ? "params: queryData," : ""}
-			${requestBody ? `data: ${isFormData ? "formData" : "bodyData"},` : ""}
-			${isFormData ? `config: { headers: { 'Content-Type': 'multipart/form-data', ...axiosConfig?.headers }, ...axiosConfig },` : "...axiosConfig"}
-		});
-		return res.data;`,
+		queryParams.length > 0 ? "axiosConfig.params = queryData;" : "",
+		isFormData
+			? "axiosConfig.headers = { ...axiosConfig.headers, 'Content-Type': 'multipart/form-data' };"
+			: "",
+		requestBody
+			? `const res = await apiClient.${method}<${responseType}>(url, bodyData, axiosConfig);`
+			: `const res = await apiClient.${method}<${responseType}>(url, axiosConfig);`,
+		"return res.data;",
 	]
 		.filter(Boolean)
 		.join("\n	");
+
+	// ${queryParams.length > 0 ? "params: queryData," : ""}
+	// ${requestBody ? `data: ${isFormData ? "formData" : "bodyData"},` : ""}
+	// ${isFormData ? `config: { headers: { 'Content-Type': 'multipart/form-data', ...axiosConfig?.headers }, ...axiosConfig },` : "...axiosConfig"}
 
 	const requestParms = hasData
 		? `props: T.${pascalCase(operationId)}Params & { axiosConfig?: AxiosRequestConfig; }`
