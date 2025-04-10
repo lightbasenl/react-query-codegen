@@ -52,7 +52,8 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		const contentType =
 			responseObj.content?.["application/ld+json"]?.schema ??
 			responseObj.content?.["application/json"]?.schema ??
-			responseObj.content?.["application/octet-stream"]?.schema;
+			responseObj.content?.["application/octet-stream"]?.schema ??
+			responseObj.content?.["application/json;charset=UTF-8"]?.schema;
 
 		const typeName = pascalCase(`${operationId}Response${code}`);
 
@@ -81,7 +82,8 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		requestBody && "content" in requestBody
 			? (requestBody.content?.["application/ld+json"]?.schema ??
 				requestBody.content?.["application/json"]?.schema ??
-				requestBody.content?.["application/octet-stream"]?.schema)
+				requestBody.content?.["application/octet-stream"]?.schema ??
+				requestBody.content?.["application/json;charset=UTF-8"]?.schema)
 			: undefined;
 
 	const requestBodySchema = content ? resolveSchema(content, spec) : undefined;
@@ -135,7 +137,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 			? "axiosConfig.headers = { ...axiosConfig.headers, 'Content-Type': 'multipart/form-data' };"
 			: "",
 		requestBody
-			? `const res = await apiClient.${method}<${responseType}>(url, bodyData, axiosConfig);`
+			? `const res = await apiClient.${method}<${responseType}>(url, ${formDataSchema?.properties ? "bodyData" : "data"}, axiosConfig);`
 			: `const res = await apiClient.${method}<${responseType}>(url, axiosConfig);`,
 		"return res.data;",
 	]

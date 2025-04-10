@@ -58,7 +58,8 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 						content["application/ld+json"] ??
 						content["application/json"] ??
 						content["multipart/form-data"] ??
-						content["application/octet-stream"];
+						content["application/octet-stream"] ??
+						content["application/json;charset=UTF-8"];
 					if (jsonContent?.schema) {
 						const typeName = `${operationId}Request`;
 						output += generateTypeDefinition(typeName, jsonContent.schema as OpenAPIV3.SchemaObject);
@@ -72,7 +73,8 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 						const content =
 							responseObj.content?.["application/ld+json"] ??
 							responseObj.content?.["application/json"] ??
-							responseObj.content?.["application/octet-stream"];
+							responseObj.content?.["application/octet-stream"] ??
+							responseObj.content?.["application/json;charset=UTF-8"];
 						if (content?.schema) {
 							const typeName = `${operationId}Response${code}`;
 							output += generateTypeDefinition(typeName, content.schema as OpenAPIV3.SchemaObject);

@@ -1,5 +1,8 @@
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import * as apiClient from "./pokApi.client";
+// TEMPORARY: allows for backward compatibility imports
+export * from "./pokApi.client";
+
 const hasDefinedProps = <T extends { [P in K]?: any }, K extends PropertyKey>(
 	obj: T,
 	...keys: K[]
@@ -7,1554 +10,1031 @@ const hasDefinedProps = <T extends { [P in K]?: any }, K extends PropertyKey>(
 	return keys.every((k) => obj[k] !== undefined);
 };
 
-export const getabilityListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getabilityList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getabilityList>[1]>
-) => {
+export const getAbilityListQueryOptions = (props: Partial<Parameters<typeof apiClient.abilityList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getabilityList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getabilityList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["abilityList", params],
+		queryFn: enabled ? () => apiClient.abilityList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getabilityRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getabilityRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getabilityRetrieve>[1]>
+export const getAbilityRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.abilityRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getabilityRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getabilityRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["abilityRetrieve", params],
+		queryFn: enabled ? () => apiClient.abilityRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getberryListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getberryList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getberryList>[1]>
-) => {
+export const getBerryListQueryOptions = (props: Partial<Parameters<typeof apiClient.berryList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getberryList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getberryList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["berryList", params],
+		queryFn: enabled ? () => apiClient.berryList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getberryRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getberryRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getberryRetrieve>[1]>
+export const getBerryRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.berryRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getberryRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getberryRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["berryRetrieve", params],
+		queryFn: enabled ? () => apiClient.berryRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getberryFirmnessListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getberryFirmnessList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getberryFirmnessList>[1]>
+export const getBerryFirmnessListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.berryFirmnessList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getberryFirmnessList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getberryFirmnessList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["berryFirmnessList", params],
+		queryFn: enabled ? () => apiClient.berryFirmnessList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getberryFirmnessRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getberryFirmnessRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getberryFirmnessRetrieve>[1]>
+export const getBerryFirmnessRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.berryFirmnessRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getberryFirmnessRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getberryFirmnessRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["berryFirmnessRetrieve", params],
+		queryFn: enabled ? () => apiClient.berryFirmnessRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getberryFlavorListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getberryFlavorList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getberryFlavorList>[1]>
+export const getBerryFlavorListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.berryFlavorList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getberryFlavorList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getberryFlavorList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["berryFlavorList", params],
+		queryFn: enabled ? () => apiClient.berryFlavorList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getberryFlavorRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getberryFlavorRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getberryFlavorRetrieve>[1]>
+export const getBerryFlavorRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.berryFlavorRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getberryFlavorRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getberryFlavorRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["berryFlavorRetrieve", params],
+		queryFn: enabled ? () => apiClient.berryFlavorRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getcharacteristicListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getcharacteristicList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getcharacteristicList>[1]>
+export const getCharacteristicListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.characteristicList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getcharacteristicList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getcharacteristicList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["characteristicList", params],
+		queryFn: enabled ? () => apiClient.characteristicList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getcharacteristicRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getcharacteristicRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getcharacteristicRetrieve>[1]>
+export const getCharacteristicRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.characteristicRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getcharacteristicRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getcharacteristicRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["characteristicRetrieve", params],
+		queryFn: enabled ? () => apiClient.characteristicRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getcontestTypeListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getcontestTypeList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getcontestTypeList>[1]>
+export const getContestTypeListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.contestTypeList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getcontestTypeList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getcontestTypeList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["contestTypeList", params],
+		queryFn: enabled ? () => apiClient.contestTypeList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getcontestTypeRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getcontestTypeRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getcontestTypeRetrieve>[1]>
+export const getContestTypeRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.contestTypeRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getcontestTypeRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getcontestTypeRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["contestTypeRetrieve", params],
+		queryFn: enabled ? () => apiClient.contestTypeRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getcontestEffectListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getcontestEffectList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getcontestEffectList>[1]>
+export const getContestEffectListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.contestEffectList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getcontestEffectList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getcontestEffectList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["contestEffectList", params],
+		queryFn: enabled ? () => apiClient.contestEffectList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getcontestEffectRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getcontestEffectRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getcontestEffectRetrieve>[1]>
+export const getContestEffectRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.contestEffectRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getcontestEffectRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getcontestEffectRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["contestEffectRetrieve", params],
+		queryFn: enabled ? () => apiClient.contestEffectRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const geteggGroupListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.geteggGroupList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.geteggGroupList>[1]>
-) => {
+export const getEggGroupListQueryOptions = (props: Partial<Parameters<typeof apiClient.eggGroupList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["geteggGroupList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.geteggGroupList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["eggGroupList", params],
+		queryFn: enabled ? () => apiClient.eggGroupList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const geteggGroupRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.geteggGroupRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.geteggGroupRetrieve>[1]>
+export const getEggGroupRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.eggGroupRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["geteggGroupRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.geteggGroupRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["eggGroupRetrieve", params],
+		queryFn: enabled ? () => apiClient.eggGroupRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getencounterMethodListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getencounterMethodList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getencounterMethodList>[1]>
+export const getEncounterMethodListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.encounterMethodList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getencounterMethodList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getencounterMethodList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["encounterMethodList", params],
+		queryFn: enabled ? () => apiClient.encounterMethodList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getencounterMethodRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getencounterMethodRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getencounterMethodRetrieve>[1]>
+export const getEncounterMethodRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.encounterMethodRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getencounterMethodRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getencounterMethodRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["encounterMethodRetrieve", params],
+		queryFn: enabled ? () => apiClient.encounterMethodRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getencounterConditionListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getencounterConditionList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getencounterConditionList>[1]>
+export const getEncounterConditionListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.encounterConditionList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getencounterConditionList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getencounterConditionList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["encounterConditionList", params],
+		queryFn: enabled ? () => apiClient.encounterConditionList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getencounterConditionRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getencounterConditionRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getencounterConditionRetrieve>[1]>
+export const getEncounterConditionRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.encounterConditionRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getencounterConditionRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getencounterConditionRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["encounterConditionRetrieve", params],
+		queryFn: enabled ? () => apiClient.encounterConditionRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getencounterConditionValueListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getencounterConditionValueList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getencounterConditionValueList>[1]>
+export const getEncounterConditionValueListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.encounterConditionValueList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getencounterConditionValueList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getencounterConditionValueList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["encounterConditionValueList", params],
+		queryFn: enabled ? () => apiClient.encounterConditionValueList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getencounterConditionValueRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getencounterConditionValueRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getencounterConditionValueRetrieve>[1]>
+export const getEncounterConditionValueRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.encounterConditionValueRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getencounterConditionValueRetrieve", params],
+		queryKey: ["encounterConditionValueRetrieve", params],
 		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getencounterConditionValueRetrieve(params, config);
-					return response.data;
-				}
+			? () => apiClient.encounterConditionValueRetrieve({ ...params, axiosConfig })
 			: skipToken,
 	});
 };
 
-export const getevolutionChainListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getevolutionChainList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getevolutionChainList>[1]>
+export const getEvolutionChainListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.evolutionChainList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getevolutionChainList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getevolutionChainList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["evolutionChainList", params],
+		queryFn: enabled ? () => apiClient.evolutionChainList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getevolutionChainRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getevolutionChainRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getevolutionChainRetrieve>[1]>
+export const getEvolutionChainRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.evolutionChainRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getevolutionChainRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getevolutionChainRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["evolutionChainRetrieve", params],
+		queryFn: enabled ? () => apiClient.evolutionChainRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getevolutionTriggerListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getevolutionTriggerList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getevolutionTriggerList>[1]>
+export const getEvolutionTriggerListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.evolutionTriggerList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getevolutionTriggerList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getevolutionTriggerList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["evolutionTriggerList", params],
+		queryFn: enabled ? () => apiClient.evolutionTriggerList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getevolutionTriggerRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getevolutionTriggerRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getevolutionTriggerRetrieve>[1]>
+export const getEvolutionTriggerRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.evolutionTriggerRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getevolutionTriggerRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getevolutionTriggerRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["evolutionTriggerRetrieve", params],
+		queryFn: enabled ? () => apiClient.evolutionTriggerRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getgenerationListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getgenerationList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getgenerationList>[1]>
+export const getGenerationListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.generationList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getgenerationList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getgenerationList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["generationList", params],
+		queryFn: enabled ? () => apiClient.generationList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getgenerationRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getgenerationRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getgenerationRetrieve>[1]>
+export const getGenerationRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.generationRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getgenerationRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getgenerationRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["generationRetrieve", params],
+		queryFn: enabled ? () => apiClient.generationRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getgenderListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getgenderList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getgenderList>[1]>
-) => {
+export const getGenderListQueryOptions = (props: Partial<Parameters<typeof apiClient.genderList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getgenderList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getgenderList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["genderList", params],
+		queryFn: enabled ? () => apiClient.genderList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getgenderRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getgenderRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getgenderRetrieve>[1]>
+export const getGenderRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.genderRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getgenderRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getgenderRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["genderRetrieve", params],
+		queryFn: enabled ? () => apiClient.genderRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getgrowthRateListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getgrowthRateList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getgrowthRateList>[1]>
+export const getGrowthRateListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.growthRateList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getgrowthRateList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getgrowthRateList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["growthRateList", params],
+		queryFn: enabled ? () => apiClient.growthRateList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getgrowthRateRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getgrowthRateRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getgrowthRateRetrieve>[1]>
+export const getGrowthRateRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.growthRateRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getgrowthRateRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getgrowthRateRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["growthRateRetrieve", params],
+		queryFn: enabled ? () => apiClient.growthRateRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getitemListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getitemList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getitemList>[1]>
-) => {
+export const getItemListQueryOptions = (props: Partial<Parameters<typeof apiClient.itemList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getitemList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getitemList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["itemList", params],
+		queryFn: enabled ? () => apiClient.itemList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getitemRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getitemRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getitemRetrieve>[1]>
-) => {
+export const getItemRetrieveQueryOptions = (props: Partial<Parameters<typeof apiClient.itemRetrieve>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getitemRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getitemRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["itemRetrieve", params],
+		queryFn: enabled ? () => apiClient.itemRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getitemCategoryListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getitemCategoryList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getitemCategoryList>[1]>
+export const getItemCategoryListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.itemCategoryList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getitemCategoryList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getitemCategoryList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["itemCategoryList", params],
+		queryFn: enabled ? () => apiClient.itemCategoryList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getitemCategoryRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getitemCategoryRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getitemCategoryRetrieve>[1]>
+export const getItemCategoryRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.itemCategoryRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getitemCategoryRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getitemCategoryRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["itemCategoryRetrieve", params],
+		queryFn: enabled ? () => apiClient.itemCategoryRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getitemAttributeListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getitemAttributeList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getitemAttributeList>[1]>
+export const getItemAttributeListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.itemAttributeList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getitemAttributeList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getitemAttributeList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["itemAttributeList", params],
+		queryFn: enabled ? () => apiClient.itemAttributeList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getitemAttributeRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getitemAttributeRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getitemAttributeRetrieve>[1]>
+export const getItemAttributeRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.itemAttributeRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getitemAttributeRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getitemAttributeRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["itemAttributeRetrieve", params],
+		queryFn: enabled ? () => apiClient.itemAttributeRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getitemFlingEffectListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getitemFlingEffectList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getitemFlingEffectList>[1]>
+export const getItemFlingEffectListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.itemFlingEffectList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getitemFlingEffectList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getitemFlingEffectList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["itemFlingEffectList", params],
+		queryFn: enabled ? () => apiClient.itemFlingEffectList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getitemFlingEffectRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getitemFlingEffectRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getitemFlingEffectRetrieve>[1]>
+export const getItemFlingEffectRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.itemFlingEffectRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getitemFlingEffectRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getitemFlingEffectRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["itemFlingEffectRetrieve", params],
+		queryFn: enabled ? () => apiClient.itemFlingEffectRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getitemPocketListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getitemPocketList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getitemPocketList>[1]>
+export const getItemPocketListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.itemPocketList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getitemPocketList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getitemPocketList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["itemPocketList", params],
+		queryFn: enabled ? () => apiClient.itemPocketList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getitemPocketRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getitemPocketRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getitemPocketRetrieve>[1]>
+export const getItemPocketRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.itemPocketRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getitemPocketRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getitemPocketRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["itemPocketRetrieve", params],
+		queryFn: enabled ? () => apiClient.itemPocketRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getlanguageListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getlanguageList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getlanguageList>[1]>
-) => {
+export const getLanguageListQueryOptions = (props: Partial<Parameters<typeof apiClient.languageList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getlanguageList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getlanguageList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["languageList", params],
+		queryFn: enabled ? () => apiClient.languageList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getlanguageRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getlanguageRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getlanguageRetrieve>[1]>
+export const getLanguageRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.languageRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getlanguageRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getlanguageRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["languageRetrieve", params],
+		queryFn: enabled ? () => apiClient.languageRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getlocationListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getlocationList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getlocationList>[1]>
-) => {
+export const getLocationListQueryOptions = (props: Partial<Parameters<typeof apiClient.locationList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getlocationList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getlocationList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["locationList", params],
+		queryFn: enabled ? () => apiClient.locationList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getlocationRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getlocationRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getlocationRetrieve>[1]>
+export const getLocationRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.locationRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getlocationRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getlocationRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["locationRetrieve", params],
+		queryFn: enabled ? () => apiClient.locationRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getlocationAreaListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getlocationAreaList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getlocationAreaList>[1]>
+export const getLocationAreaListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.locationAreaList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getlocationAreaList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getlocationAreaList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["locationAreaList", params],
+		queryFn: enabled ? () => apiClient.locationAreaList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getlocationAreaRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getlocationAreaRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getlocationAreaRetrieve>[1]>
+export const getLocationAreaRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.locationAreaRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getlocationAreaRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getlocationAreaRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["locationAreaRetrieve", params],
+		queryFn: enabled ? () => apiClient.locationAreaRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmachineListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmachineList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmachineList>[1]>
-) => {
+export const getMachineListQueryOptions = (props: Partial<Parameters<typeof apiClient.machineList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getmachineList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmachineList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["machineList", params],
+		queryFn: enabled ? () => apiClient.machineList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmachineRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmachineRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmachineRetrieve>[1]>
+export const getMachineRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.machineRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getmachineRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmachineRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["machineRetrieve", params],
+		queryFn: enabled ? () => apiClient.machineRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmoveListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmoveList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmoveList>[1]>
-) => {
+export const getMoveListQueryOptions = (props: Partial<Parameters<typeof apiClient.moveList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getmoveList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmoveList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["moveList", params],
+		queryFn: enabled ? () => apiClient.moveList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmoveRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmoveRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmoveRetrieve>[1]>
-) => {
+export const getMoveRetrieveQueryOptions = (props: Partial<Parameters<typeof apiClient.moveRetrieve>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getmoveRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmoveRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["moveRetrieve", params],
+		queryFn: enabled ? () => apiClient.moveRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmoveAilmentListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmoveAilmentList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmoveAilmentList>[1]>
+export const getMoveAilmentListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.moveAilmentList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getmoveAilmentList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmoveAilmentList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["moveAilmentList", params],
+		queryFn: enabled ? () => apiClient.moveAilmentList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmoveAilmentRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmoveAilmentRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmoveAilmentRetrieve>[1]>
+export const getMoveAilmentRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.moveAilmentRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getmoveAilmentRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmoveAilmentRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["moveAilmentRetrieve", params],
+		queryFn: enabled ? () => apiClient.moveAilmentRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmoveBattleStyleListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmoveBattleStyleList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmoveBattleStyleList>[1]>
+export const getMoveBattleStyleListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.moveBattleStyleList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getmoveBattleStyleList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmoveBattleStyleList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["moveBattleStyleList", params],
+		queryFn: enabled ? () => apiClient.moveBattleStyleList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmoveBattleStyleRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmoveBattleStyleRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmoveBattleStyleRetrieve>[1]>
+export const getMoveBattleStyleRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.moveBattleStyleRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getmoveBattleStyleRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmoveBattleStyleRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["moveBattleStyleRetrieve", params],
+		queryFn: enabled ? () => apiClient.moveBattleStyleRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmoveCategoryListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmoveCategoryList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmoveCategoryList>[1]>
+export const getMoveCategoryListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.moveCategoryList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getmoveCategoryList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmoveCategoryList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["moveCategoryList", params],
+		queryFn: enabled ? () => apiClient.moveCategoryList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmoveCategoryRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmoveCategoryRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmoveCategoryRetrieve>[1]>
+export const getMoveCategoryRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.moveCategoryRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getmoveCategoryRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmoveCategoryRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["moveCategoryRetrieve", params],
+		queryFn: enabled ? () => apiClient.moveCategoryRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmoveDamageClassListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmoveDamageClassList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmoveDamageClassList>[1]>
+export const getMoveDamageClassListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.moveDamageClassList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getmoveDamageClassList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmoveDamageClassList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["moveDamageClassList", params],
+		queryFn: enabled ? () => apiClient.moveDamageClassList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmoveDamageClassRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmoveDamageClassRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmoveDamageClassRetrieve>[1]>
+export const getMoveDamageClassRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.moveDamageClassRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getmoveDamageClassRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmoveDamageClassRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["moveDamageClassRetrieve", params],
+		queryFn: enabled ? () => apiClient.moveDamageClassRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmoveLearnMethodListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmoveLearnMethodList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmoveLearnMethodList>[1]>
+export const getMoveLearnMethodListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.moveLearnMethodList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getmoveLearnMethodList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmoveLearnMethodList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["moveLearnMethodList", params],
+		queryFn: enabled ? () => apiClient.moveLearnMethodList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmoveLearnMethodRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmoveLearnMethodRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmoveLearnMethodRetrieve>[1]>
+export const getMoveLearnMethodRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.moveLearnMethodRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getmoveLearnMethodRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmoveLearnMethodRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["moveLearnMethodRetrieve", params],
+		queryFn: enabled ? () => apiClient.moveLearnMethodRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmoveTargetListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmoveTargetList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmoveTargetList>[1]>
+export const getMoveTargetListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.moveTargetList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getmoveTargetList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmoveTargetList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["moveTargetList", params],
+		queryFn: enabled ? () => apiClient.moveTargetList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getmoveTargetRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getmoveTargetRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getmoveTargetRetrieve>[1]>
+export const getMoveTargetRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.moveTargetRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getmoveTargetRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getmoveTargetRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["moveTargetRetrieve", params],
+		queryFn: enabled ? () => apiClient.moveTargetRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getnatureListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getnatureList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getnatureList>[1]>
-) => {
+export const getNatureListQueryOptions = (props: Partial<Parameters<typeof apiClient.natureList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getnatureList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getnatureList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["natureList", params],
+		queryFn: enabled ? () => apiClient.natureList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getnatureRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getnatureRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getnatureRetrieve>[1]>
+export const getNatureRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.natureRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getnatureRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getnatureRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["natureRetrieve", params],
+		queryFn: enabled ? () => apiClient.natureRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpalParkAreaListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpalParkAreaList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpalParkAreaList>[1]>
+export const getPalParkAreaListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.palParkAreaList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getpalParkAreaList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpalParkAreaList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["palParkAreaList", params],
+		queryFn: enabled ? () => apiClient.palParkAreaList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpalParkAreaRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpalParkAreaRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpalParkAreaRetrieve>[1]>
+export const getPalParkAreaRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.palParkAreaRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getpalParkAreaRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpalParkAreaRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["palParkAreaRetrieve", params],
+		queryFn: enabled ? () => apiClient.palParkAreaRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokedexListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokedexList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokedexList>[1]>
-) => {
+export const getPokedexListQueryOptions = (props: Partial<Parameters<typeof apiClient.pokedexList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getpokedexList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokedexList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokedexList", params],
+		queryFn: enabled ? () => apiClient.pokedexList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokedexRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokedexRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokedexRetrieve>[1]>
+export const getPokedexRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokedexRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getpokedexRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokedexRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokedexRetrieve", params],
+		queryFn: enabled ? () => apiClient.pokedexRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokemonListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokemonList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokemonList>[1]>
-) => {
+export const getPokemonListQueryOptions = (props: Partial<Parameters<typeof apiClient.pokemonList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getpokemonList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokemonList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokemonList", params],
+		queryFn: enabled ? () => apiClient.pokemonList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokemonRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokemonRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokemonRetrieve>[1]>
+export const getPokemonRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokemonRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getpokemonRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokemonRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokemonRetrieve", params],
+		queryFn: enabled ? () => apiClient.pokemonRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokemonColorListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokemonColorList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokemonColorList>[1]>
+export const getPokemonColorListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokemonColorList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getpokemonColorList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokemonColorList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokemonColorList", params],
+		queryFn: enabled ? () => apiClient.pokemonColorList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokemonColorRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokemonColorRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokemonColorRetrieve>[1]>
+export const getPokemonColorRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokemonColorRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getpokemonColorRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokemonColorRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokemonColorRetrieve", params],
+		queryFn: enabled ? () => apiClient.pokemonColorRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokemonFormListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokemonFormList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokemonFormList>[1]>
+export const getPokemonFormListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokemonFormList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getpokemonFormList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokemonFormList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokemonFormList", params],
+		queryFn: enabled ? () => apiClient.pokemonFormList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokemonFormRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokemonFormRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokemonFormRetrieve>[1]>
+export const getPokemonFormRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokemonFormRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getpokemonFormRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokemonFormRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokemonFormRetrieve", params],
+		queryFn: enabled ? () => apiClient.pokemonFormRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokemonHabitatListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokemonHabitatList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokemonHabitatList>[1]>
+export const getPokemonHabitatListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokemonHabitatList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getpokemonHabitatList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokemonHabitatList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokemonHabitatList", params],
+		queryFn: enabled ? () => apiClient.pokemonHabitatList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokemonHabitatRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokemonHabitatRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokemonHabitatRetrieve>[1]>
+export const getPokemonHabitatRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokemonHabitatRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getpokemonHabitatRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokemonHabitatRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokemonHabitatRetrieve", params],
+		queryFn: enabled ? () => apiClient.pokemonHabitatRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokemonShapeListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokemonShapeList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokemonShapeList>[1]>
+export const getPokemonShapeListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokemonShapeList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getpokemonShapeList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokemonShapeList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokemonShapeList", params],
+		queryFn: enabled ? () => apiClient.pokemonShapeList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokemonShapeRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokemonShapeRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokemonShapeRetrieve>[1]>
+export const getPokemonShapeRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokemonShapeRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getpokemonShapeRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokemonShapeRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokemonShapeRetrieve", params],
+		queryFn: enabled ? () => apiClient.pokemonShapeRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokemonSpeciesListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokemonSpeciesList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokemonSpeciesList>[1]>
+export const getPokemonSpeciesListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokemonSpeciesList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getpokemonSpeciesList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokemonSpeciesList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokemonSpeciesList", params],
+		queryFn: enabled ? () => apiClient.pokemonSpeciesList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokemonSpeciesRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokemonSpeciesRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokemonSpeciesRetrieve>[1]>
+export const getPokemonSpeciesRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokemonSpeciesRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getpokemonSpeciesRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokemonSpeciesRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokemonSpeciesRetrieve", params],
+		queryFn: enabled ? () => apiClient.pokemonSpeciesRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokeathlonStatListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokeathlonStatList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokeathlonStatList>[1]>
+export const getPokeathlonStatListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokeathlonStatList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getpokeathlonStatList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokeathlonStatList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokeathlonStatList", params],
+		queryFn: enabled ? () => apiClient.pokeathlonStatList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokeathlonStatRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokeathlonStatRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokeathlonStatRetrieve>[1]>
+export const getPokeathlonStatRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokeathlonStatRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getpokeathlonStatRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokeathlonStatRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokeathlonStatRetrieve", params],
+		queryFn: enabled ? () => apiClient.pokeathlonStatRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getregionListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getregionList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getregionList>[1]>
-) => {
+export const getRegionListQueryOptions = (props: Partial<Parameters<typeof apiClient.regionList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getregionList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getregionList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["regionList", params],
+		queryFn: enabled ? () => apiClient.regionList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getregionRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getregionRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getregionRetrieve>[1]>
+export const getRegionRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.regionRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getregionRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getregionRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["regionRetrieve", params],
+		queryFn: enabled ? () => apiClient.regionRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getstatListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getstatList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getstatList>[1]>
-) => {
+export const getStatListQueryOptions = (props: Partial<Parameters<typeof apiClient.statList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getstatList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getstatList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["statList", params],
+		queryFn: enabled ? () => apiClient.statList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getstatRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getstatRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getstatRetrieve>[1]>
-) => {
+export const getStatRetrieveQueryOptions = (props: Partial<Parameters<typeof apiClient.statRetrieve>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getstatRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getstatRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["statRetrieve", params],
+		queryFn: enabled ? () => apiClient.statRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getsuperContestEffectListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getsuperContestEffectList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getsuperContestEffectList>[1]>
+export const getSuperContestEffectListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.superContestEffectList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getsuperContestEffectList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getsuperContestEffectList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["superContestEffectList", params],
+		queryFn: enabled ? () => apiClient.superContestEffectList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getsuperContestEffectRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getsuperContestEffectRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getsuperContestEffectRetrieve>[1]>
+export const getSuperContestEffectRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.superContestEffectRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getsuperContestEffectRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getsuperContestEffectRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["superContestEffectRetrieve", params],
+		queryFn: enabled ? () => apiClient.superContestEffectRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const gettypeListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.gettypeList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.gettypeList>[1]>
-) => {
+export const getTypeListQueryOptions = (props: Partial<Parameters<typeof apiClient.typeList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["gettypeList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.gettypeList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["typeList", params],
+		queryFn: enabled ? () => apiClient.typeList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const gettypeRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.gettypeRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.gettypeRetrieve>[1]>
-) => {
+export const getTypeRetrieveQueryOptions = (props: Partial<Parameters<typeof apiClient.typeRetrieve>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["gettypeRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.gettypeRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["typeRetrieve", params],
+		queryFn: enabled ? () => apiClient.typeRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getversionListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getversionList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getversionList>[1]>
-) => {
+export const getVersionListQueryOptions = (props: Partial<Parameters<typeof apiClient.versionList>[0]>) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getversionList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getversionList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["versionList", params],
+		queryFn: enabled ? () => apiClient.versionList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getversionRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getversionRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getversionRetrieve>[1]>
+export const getVersionRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.versionRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getversionRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getversionRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["versionRetrieve", params],
+		queryFn: enabled ? () => apiClient.versionRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getversionGroupListQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getversionGroupList>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getversionGroupList>[1]>
+export const getVersionGroupListQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.versionGroupList>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params);
 	return queryOptions({
-		queryKey: ["getversionGroupList", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getversionGroupList(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["versionGroupList", params],
+		queryFn: enabled ? () => apiClient.versionGroupList({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getversionGroupRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getversionGroupRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getversionGroupRetrieve>[1]>
+export const getVersionGroupRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.versionGroupRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "id");
 	return queryOptions({
-		queryKey: ["getversionGroupRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getversionGroupRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["versionGroupRetrieve", params],
+		queryFn: enabled ? () => apiClient.versionGroupRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };
 
-export const getpokemonEncountersRetrieveQueryOptions = (
-	params: Partial<Parameters<typeof apiClient.getpokemonEncountersRetrieve>[0]>,
-	config?: Partial<Parameters<typeof apiClient.getpokemonEncountersRetrieve>[1]>
+export const getPokemonEncountersRetrieveQueryOptions = (
+	props: Partial<Parameters<typeof apiClient.pokemonEncountersRetrieve>[0]>
 ) => {
+	const { axiosConfig, ...params } = props || {};
 	const enabled = hasDefinedProps(params, "pokemon_id");
 	return queryOptions({
-		queryKey: ["getpokemonEncountersRetrieve", params],
-		queryFn: enabled
-			? async () => {
-					const response = await apiClient.getpokemonEncountersRetrieve(params, config);
-					return response.data;
-				}
-			: skipToken,
+		queryKey: ["pokemonEncountersRetrieve", params],
+		queryFn: enabled ? () => apiClient.pokemonEncountersRetrieve({ ...params, axiosConfig }) : skipToken,
 	});
 };

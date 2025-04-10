@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import axios from "axios";
 import type { OpenAPIV3 } from "openapi-types";
+import { convert, convertObj } from "swagger2openapi";
 import * as yaml from "yaml";
 import { generateApiClient } from "./generator/clientGenerator";
 import { generateInstance } from "./generator/instanceGenerator";
@@ -15,19 +16,27 @@ import { specTitle } from "./utils";
  */
 async function loadOpenAPISpec(specSource: string): Promise<OpenAPIV3.Document> {
 	try {
+		let spec: any;
+
 		if (specSource.startsWith("http")) {
 			const response = await axios.get(specSource);
-			// Check if response is YAML by looking for common YAML indicators
-			const isYaml =
-				typeof response.data === "string" &&
-				(response.data.trim().startsWith("openapi:") || response.data.trim().startsWith("swagger:"));
-
-			return isYaml ? yaml.parse(response.data) : response.data;
+			spec = typeof response.data === "string" ? yaml.parse(response.data) : response.data;
+		} else {
+			const content = await readFile(specSource, "utf-8");
+			spec = specSource.endsWith(".json") ? JSON.parse(content) : yaml.parse(content);
 		}
 
-		const content = await readFile(specSource, "utf-8");
-		// Handle both JSON and YAML formats
-		return specSource.endsWith(".json") ? JSON.parse(content) : yaml.parse(content);
+		// Convert Swagger 2.0 to OpenAPI 3.0 if needed
+		if (spec.swagger === "2.0") {
+			return new Promise((resolve, reject) => {
+				convertObj(spec, {}, (err, result) => {
+					if (err) reject(err);
+					else resolve(result.openapi);
+				});
+			});
+		}
+
+		return spec;
 	} catch (error) {
 		if (error instanceof Error) {
 			throw new Error(`Failed to load OpenAPI spec: ${error.message}`);
