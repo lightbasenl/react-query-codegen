@@ -137,7 +137,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 			? "axiosConfig.headers = { ...axiosConfig.headers, 'Content-Type': 'multipart/form-data' };"
 			: "",
 		requestBody
-			? `const res = await apiClient.${method}<${responseType}>(url, ${formDataSchema?.properties ? "bodyData" : "data"}, axiosConfig);`
+			? `const res = await apiClient.${method}<${responseType}>(url, ${formDataSchema?.properties || requestBodySchema?.properties ? "bodyData" : "data"}, axiosConfig);`
 			: `const res = await apiClient.${method}<${responseType}>(url, axiosConfig);`,
 		"return res.data;",
 	]
