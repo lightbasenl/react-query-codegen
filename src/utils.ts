@@ -50,7 +50,11 @@ export function sanitizeTypeName(name: string): string {
 }
 
 export function specTitle(spec: OpenAPIV3.Document): string {
-	return camelCase(spec.info.title.toLowerCase().replace(/\s+/g, "-"));
+	const title = spec.info.title ?? "openAPi";
+	if (!spec.info.title) {
+		console.warn("No title found in OpenAPI spec, using 'openAPi' as default");
+	}
+	return camelCase(title.toLowerCase().replace(/\s+/g, "-"));
 }
 
 /**
