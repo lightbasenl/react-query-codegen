@@ -132,7 +132,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 				})
 				.join("\n			")}`
 			: "",
-		queryParams.length > 0 ? "axiosConfig.params = queryData;" : "",
+		queryParams.length > 0 ? "axiosConfig.params = { ...axiosConfig.params, ...queryData };" : "",
 		isFormData
 			? "axiosConfig.headers = { ...axiosConfig.headers, 'Content-Type': 'multipart/form-data' };"
 			: "",
