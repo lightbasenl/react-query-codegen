@@ -100,16 +100,16 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 			? `T.${`${namedType}Response${responseDetails[0]}`}`
 			: "unknown";
 
-	const urlWithParams = urlParams.length > 0 ? `\`${path.replace(/{(\w+)}/g, "${data.$1}")}\`` : `"${path}"`;
+	const urlWithParams =
+		urlParams.length > 0 ? `\`${path.replace(/{(\w+)}/g, "encodeURIComponent(data.$1)")}\`` : `"${path}"`;
 
 	const methodBody = [
 		`${hasData ? "const { axiosConfig = {}, ...data } = props || {};" : "const { axiosConfig } = props || {};"}`,
 		"const apiClient = getApiClient();",
 		`const url = ${urlWithParams};`,
 		queryParams.length > 0
-			? `const queryData = {
-				${queryParams.map((p) => `["${p.name}"]: data["${p.name}"]`).join(",\n				")}
-			};`
+			? `const queryData = new URLSearchParams();
+				${queryParams.map((p) => `queryData.append("${p.name}", encodeURIComponent(data["${p.name}"]));`).join("\n				")}`
 			: "",
 		requestBodySchema?.properties
 			? `const bodyData = {
