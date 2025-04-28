@@ -108,8 +108,9 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		"const apiClient = getApiClient();",
 		`const url = ${urlWithParams};`,
 		queryParams.length > 0
-			? `const queryData = new URLSearchParams();
-				${queryParams.map((p) => `if (data["${p.name}"]) { queryData.append("${p.name}", encodeURIComponent(data["${p.name}"]));}`)}`
+			? `const queryData = {
+			${queryParams.map((p) => `["${p.name}"]: data["${p.name}"]`).join(",\n				")}
+		};`
 			: "",
 		requestBodySchema?.properties
 			? `const bodyData = {
