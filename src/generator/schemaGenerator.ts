@@ -89,6 +89,8 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 					[]) as OpenAPIV3.ParameterObject[];
 				const queryParams = (parameters?.filter((p) => "in" in p && p.in === "query") ||
 					[]) as OpenAPIV3.ParameterObject[];
+				const headerParams = (parameters?.filter((p) => "in" in p && p.in === "header") ||
+					[]) as OpenAPIV3.ParameterObject[];
 
 				// Add path and query parameters
 				urlParams.forEach((p) => {
@@ -114,6 +116,19 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 							: "";
 					dataProps.push(`${desc}${safeName}${p.required ? "" : "?"}: ${getTypeFromSchema(p.schema)}`);
 				});
+
+				headerParams.forEach((p) => {
+					const safeName = sanitizePropertyName(p.name);
+					const isDeprecated = "deprecated" in p && p.deprecated;
+					const hasDescription = "description" in p && p.description;
+					const desc =
+						hasDescription || isDeprecated
+							? `\n/**${hasDescription ? `\n* ${p.description}` : ""}${isDeprecated ? "\n* @deprecated" : ""}
+							*/\n`
+							: "";
+					dataProps.push(`${desc}${safeName}${p.required ? "" : "?"}: ${getTypeFromSchema(p.schema)}`);
+				});
+
 				// Add request body type if it exists
 				const hasData = (parameters && parameters.length > 0) || requestBody;
 
