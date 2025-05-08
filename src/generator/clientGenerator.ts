@@ -71,6 +71,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 
 	const urlParams = parameters?.filter((p) => p.in === "path") || [];
 	const queryParams = parameters?.filter((p) => p.in === "query") || [];
+	const headerParams = parameters?.filter((p) => p.in === "header") || [];
 
 	const isFormData = requestBody && "content" in requestBody && requestBody.content?.["multipart/form-data"];
 
@@ -112,6 +113,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 			${queryParams.map((p) => `["${p.name}"]: data["${p.name}"]`).join(",\n				")}
 		};`
 			: "",
+
 		requestBodySchema?.properties
 			? `const bodyData = {
 				${Object.entries(requestBodySchema.properties)
@@ -119,6 +121,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 					.join(",\n				")}
 			};`
 			: "",
+
 		formDataSchema?.properties
 			? `const bodyData = new FormData();
 			${Object.entries(formDataSchema.properties)
@@ -137,6 +140,12 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		isFormData
 			? "axiosConfig.headers = { ...axiosConfig.headers, 'Content-Type': 'multipart/form-data' };"
 			: "",
+		headerParams.length > 0
+			? `const headerData = {
+			${headerParams.map((p) => `["${p.name}"]: data["${p.name}"]`).join(",\n				")}
+		};`
+			: "",
+		headerParams.length > 0 ? "axiosConfig.headers = { ...axiosConfig.headers, ...headerData };" : "",
 		requestBody
 			? `const res = await apiClient.${method}<${responseType}>(url, ${formDataSchema?.properties || requestBodySchema?.properties ? "bodyData" : "data"}, axiosConfig);`
 			: `const res = await apiClient.${method}<${responseType}>(url, axiosConfig);`,
