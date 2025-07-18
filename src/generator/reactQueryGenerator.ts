@@ -2,6 +2,18 @@ import type { OpenAPIV3 } from "openapi-types";
 import { camelCase, sanitizeTypeName, specTitle } from "../utils";
 import type { OperationInfo } from "./clientGenerator";
 
+function resolveSchema(
+	schema: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject | undefined,
+	spec: OpenAPIV3.Document
+): OpenAPIV3.SchemaObject | undefined {
+	if (!schema) return undefined;
+	if ("$ref" in schema) {
+		const index = schema.$ref.split("/").pop();
+		return spec.components?.schemas?.[index as string] as OpenAPIV3.SchemaObject;
+	}
+	return schema;
+}
+
 function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document): string {
 	const { operationId, parameters, requestBody, method } = operation;
 
@@ -26,6 +38,16 @@ function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document
 				requestBody.content?.["application/json"]?.schema ??
 				requestBody.content?.["application/octet-stream"]?.schema)
 			: undefined;
+
+	const requestBodySchema = content ? resolveSchema(content, spec) : undefined;
+
+	// Check if request body is a primitive type (string, number, boolean)
+	const isPrimitiveRequestBody =
+		requestBodySchema &&
+		!requestBodySchema.properties &&
+		!requestBodySchema.type?.includes("object") &&
+		!requestBodySchema.type?.includes("array");
+
 	// Get required parameter names from both parameters and request body
 	const requiredParams = [
 		...(parameters?.filter((p) => p.required).map((p) => `'${p.name}'`) || []),
@@ -44,15 +66,39 @@ function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document
 	const namedQueryOptions = camelCase(`get${operationId}QueryOptions`);
 	const namedQuery = camelCase(`${operationId}`);
 
+	// Handle destructuring based on whether we have primitive request body
+	const destructuringLine = hasData
+		? isPrimitiveRequestBody
+			? "const { axiosConfig, data } = props || {};"
+			: "const { axiosConfig, ...params } = props || {};"
+		: "const { axiosConfig } = props || {};";
+
+	const paramsVariable = hasData ? (isPrimitiveRequestBody ? "data" : "params") : "";
+
+	const queryKeyParams = hasData ? paramsVariable : "";
+
+	const functionCall = hasData
+		? isPrimitiveRequestBody
+			? "{data, axiosConfig}"
+			: "{...params, axiosConfig}"
+		: "{axiosConfig}";
+
+	// Handle enabled logic based on request body type
+	const enabledLogic = hasData
+		? isPrimitiveRequestBody
+			? "!!data"
+			: `hasDefinedProps(${paramsVariable}, ${requiredParams.join(", ")})`
+		: "true";
+
 	return `
 export const ${namedQueryOptions} = ( 
   ${hasData ? `props: Partial<Parameters<typeof apiClient.${namedQuery}>[0]>` : `props?: Partial<Parameters<typeof apiClient.${namedQuery}>[0]>`}
 ) => {
-  ${hasData ? "const { axiosConfig, ...params } = props || {};" : "const { axiosConfig } = props || {};"}
-  const enabled = ${hasData ? `hasDefinedProps(params, ${requiredParams.join(", ")})` : "true"};
+  ${destructuringLine}
+  const enabled = ${enabledLogic};
   return queryOptions({
-    queryKey: ['${camelCase(operationId)}', ${hasData ? "params" : ""}],
-    queryFn: enabled ? () => apiClient.${namedQuery}(${hasData ? "{...params, axiosConfig}" : "{axiosConfig}"}) : skipToken,
+    queryKey: ['${camelCase(operationId)}', ${queryKeyParams}],
+    queryFn: enabled ? () => apiClient.${namedQuery}(${functionCall}) : skipToken,
   });
 };`;
 }
