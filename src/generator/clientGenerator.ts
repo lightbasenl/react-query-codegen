@@ -89,6 +89,13 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 
 	const requestBodySchema = content ? resolveSchema(content, spec) : undefined;
 
+	// Check if request body is a primitive type (string, number, boolean)
+	const isPrimitiveRequestBody =
+		requestBodySchema &&
+		!requestBodySchema.properties &&
+		!requestBodySchema.type?.includes("object") &&
+		!requestBodySchema.type?.includes("array");
+
 	// Add request body type if it exists
 	const hasData = (parameters && parameters.length > 0) || operation.requestBody;
 
@@ -104,8 +111,15 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 	const urlWithParams =
 		urlParams.length > 0 ? `\`${path.replace(/{(\w+)}/g, "${encodeURIComponent(data.$1)}")}\`` : `"${path}"`;
 
+	// Handle destructuring based on whether we have primitive request body
+	const destructuringLine = hasData
+		? isPrimitiveRequestBody
+			? "const { axiosConfig = {}, data } = props || {};"
+			: "const { axiosConfig = {}, ...data } = props || {};"
+		: "const { axiosConfig } = props || {};";
+
 	const methodBody = [
-		`${hasData ? "const { axiosConfig = {}, ...data } = props || {};" : "const { axiosConfig } = props || {};"}`,
+		destructuringLine,
 		"const apiClient = getApiClient();",
 		`const url = ${urlWithParams};`,
 		queryParams.length > 0
@@ -129,9 +143,9 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 					const schemaProperty = prop as OpenAPIV3.SchemaObject;
 					const isBinary = schemaProperty.format === "binary";
 					return formDataSchema?.required?.includes(key)
-						? `bodyData.append("${key}", ${isBinary ? "" : "String("}${queryParams.length > 0 ? "bodyData" : "data"}.${key}${isBinary ? "" : ")"});`
-						: `if (${queryParams.length > 0 ? "bodyData" : "data"}.${key} != null) {
-							bodyData.append("${key}", ${isBinary ? "" : "String("}${queryParams.length > 0 ? "bodyData" : "data"}.${key}${isBinary ? "" : ")"});
+						? `bodyData.append("${key}", ${isBinary ? "" : "String("}data.${key}${isBinary ? "" : ")"});`
+						: `if (data.${key} != null) {
+							bodyData.append("${key}", ${isBinary ? "" : "String("}data.${key}${isBinary ? "" : ")"});
 						}`;
 				})
 				.join("\n			")}`
@@ -159,7 +173,9 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 	// ${isFormData ? `config: { headers: { 'Content-Type': 'multipart/form-data', ...axiosConfig?.headers }, ...axiosConfig },` : "...axiosConfig"}
 
 	const requestParms = hasData
-		? `props: T.${pascalCase(operationId)}Params & { axiosConfig?: AxiosRequestConfig; }`
+		? isPrimitiveRequestBody
+			? `props: { data: T.${pascalCase(operationId)}Params; axiosConfig?: AxiosRequestConfig; }`
+			: `props: T.${pascalCase(operationId)}Params & { axiosConfig?: AxiosRequestConfig; }`
 		: "props?: { axiosConfig?: AxiosRequestConfig }";
 
 	return `
