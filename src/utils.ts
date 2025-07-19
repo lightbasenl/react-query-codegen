@@ -64,6 +64,7 @@ export function specTitle(spec: OpenAPIV3.Document): string {
  * - References ($ref) by extracting the type name
  * - Nullable types by appending "| null"
  * - Enums by creating union types of the values
+ * - OneOf schemas as union types
  * - Basic types (string, number, boolean)
  * - Binary format strings as a union with file metadata object
  * - Arrays by recursively getting the item type
@@ -97,6 +98,14 @@ export function getTypeFromSchema(
 			);
 		}
 		return schema.enum.map((e) => (typeof e === "string" ? `'${e}'` : e)).join(" | ") + nullable;
+	}
+
+	// Handle oneOf as union types
+	if ("oneOf" in schema && schema.oneOf) {
+		const unionTypes = schema.oneOf
+			.map((subSchema) => getTypeFromSchema(subSchema))
+			.filter((type): type is string => type !== undefined);
+		return unionTypes.length > 0 ? `${unionTypes.join(" | ")}${nullable}` : `any${nullable}`;
 	}
 
 	// Handle types based on the "type" property
