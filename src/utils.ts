@@ -263,10 +263,6 @@ export function getTypeFromSchema(
 				if (schema.properties) {
 					const properties = Object.entries(schema.properties)
 						.map(([key, prop]) => {
-							// @ts-ignore
-							if (schema.required === false) {
-								console.log(JSON.stringify(schema, null, 2));
-							}
 							const isRequired = schema.required?.includes(key);
 							const propertyType = getTypeFromSchema(prop);
 							const safeName = sanitizePropertyName(key);
@@ -274,8 +270,7 @@ export function getTypeFromSchema(
 							const hasDescription = "description" in prop && prop.description;
 							const desc =
 								hasDescription || isDeprecated
-									? `/**${hasDescription ? `\n* ${prop.description}` : ""}${isDeprecated ? "\n* @deprecated" : ""}
-									*/\n`
+									? `/**${hasDescription ? `\n * ${prop.description}` : ""}${isDeprecated ? "\n * @deprecated" : ""}\n */\n`
 									: "";
 							return `${desc}${safeName}${isRequired ? "" : "?"}: ${propertyType};`;
 						})

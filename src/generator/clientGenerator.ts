@@ -144,10 +144,6 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		.filter(Boolean)
 		.join("\n	");
 
-	// ${queryParams.length > 0 ? "params: queryData," : ""}
-	// ${requestBody ? `data: ${isFormData ? "formData" : "bodyData"},` : ""}
-	// ${isFormData ? `config: { headers: { 'Content-Type': 'multipart/form-data', ...axiosConfig?.headers }, ...axiosConfig },` : "...axiosConfig"}
-
 	const requestParms = hasData
 		? isPrimitiveRequestBody
 			? `props: { data: T.${pascalCase(operationId)}Params; axiosConfig?: AxiosRequestConfig; }`
