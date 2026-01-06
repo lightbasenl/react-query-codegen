@@ -63,6 +63,7 @@ export function specTitle(spec: OpenAPIV3.Document): string {
  * Handles:
  * - References ($ref) by extracting the type name
  * - Nullable types by appending "| null"
+ * - Composition types (allOf → intersection, oneOf/anyOf → union)
  * - Enums by creating union types of the values
  * - OneOf schemas as union types
  * - Basic types (string, number, boolean)
@@ -72,7 +73,7 @@ export function specTitle(spec: OpenAPIV3.Document): string {
  * - Objects with additionalProperties as Records
  * - Fallback to "any" for unknown types
  *
- * @param param - The OpenAPI schema/parameter object to convert
+ * @param schema - The OpenAPI schema/parameter object to convert
  * @returns The TypeScript type as a string
  */
 export function getTypeFromSchema(
@@ -87,6 +88,36 @@ export function getTypeFromSchema(
 
 	// Add "| null" for nullable types
 	const nullable = "nullable" in schema && schema.nullable ? " | null" : "";
+
+	// Handle allOf (intersection types)
+	if ("allOf" in schema && schema.allOf) {
+		const types = schema.allOf
+			.map((s) => getTypeFromSchema(s))
+			.filter(Boolean) as string[];
+		if (types.length === 0) return "any";
+		const result = types.length === 1 ? types[0] : `(${types.join(" & ")})`;
+		return `${result}${nullable}`;
+	}
+
+	// Handle oneOf (union types - exactly one)
+	if ("oneOf" in schema && schema.oneOf) {
+		const types = schema.oneOf
+			.map((s) => getTypeFromSchema(s))
+			.filter(Boolean) as string[];
+		if (types.length === 0) return "any";
+		const result = types.length === 1 ? types[0] : `(${types.join(" | ")})`;
+		return `${result}${nullable}`;
+	}
+
+	// Handle anyOf (union types - one or more)
+	if ("anyOf" in schema && schema.anyOf) {
+		const types = schema.anyOf
+			.map((s) => getTypeFromSchema(s))
+			.filter(Boolean) as string[];
+		if (types.length === 0) return "any";
+		const result = types.length === 1 ? types[0] : `(${types.join(" | ")})`;
+		return `${result}${nullable}`;
+	}
 
 	// Handle enums as union types
 	if ("enum" in schema && schema.enum) {
@@ -136,6 +167,10 @@ export function getTypeFromSchema(
 				if (schema.properties) {
 					const properties = Object.entries(schema.properties)
 						.map(([key, prop]) => {
+							// @ts-ignore
+							if (schema.required === false) {
+								console.log(JSON.stringify(schema, null, 2));
+							}
 							const isRequired = schema.required?.includes(key);
 							const propertyType = getTypeFromSchema(prop);
 							const safeName = sanitizePropertyName(key);
