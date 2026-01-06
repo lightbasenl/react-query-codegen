@@ -1,9 +1,9 @@
 import type { OpenAPIV3 } from "openapi-types";
 import {
+	type OperationInfo,
 	camelCase,
 	collectOperations,
 	getContentSchema,
-	type OperationInfo,
 	resolveSchema,
 	specTitle,
 } from "../utils";

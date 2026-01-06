@@ -1,5 +1,11 @@
 import type { OpenAPIV3 } from "openapi-types";
-import { getContentSchema, getTypeFromSchema, pascalCase, sanitizePropertyName, sanitizeTypeName } from "../utils";
+import {
+	getContentSchema,
+	getTypeFromSchema,
+	pascalCase,
+	sanitizePropertyName,
+	sanitizeTypeName,
+} from "../utils";
 
 /**
  * Formats a parameter as a TypeScript property string with optional JSDoc.

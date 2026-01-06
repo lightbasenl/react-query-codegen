@@ -1,9 +1,9 @@
 import type { OpenAPIV3 } from "openapi-types";
 import {
+	type OperationInfo,
 	camelCase,
 	collectOperations,
 	getContentSchema,
-	type OperationInfo,
 	pascalCase,
 	resolveSchema,
 	specTitle,
@@ -65,7 +65,8 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		? resolveSchema(requestBody.content["multipart/form-data"].schema, spec)
 		: undefined;
 
-	const requestBodyContent = requestBody && "content" in requestBody ? getContentSchema(requestBody.content) : undefined;
+	const requestBodyContent =
+		requestBody && "content" in requestBody ? getContentSchema(requestBody.content) : undefined;
 	const requestBodySchema = requestBodyContent ? resolveSchema(requestBodyContent, spec) : undefined;
 
 	// Check if request body is a primitive type (string, number, boolean)
