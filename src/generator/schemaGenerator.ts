@@ -67,6 +67,7 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 				}
 
 				// Generate response types
+				const errorTypes: string[] = [];
 				if (responses) {
 					for (const [code, response] of Object.entries(responses)) {
 						const responseObj = response as OpenAPIV3.ResponseObject;
@@ -78,8 +79,18 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 						if (content?.schema) {
 							const typeName = `${operationId}Response${code}`;
 							output += generateTypeDefinition(typeName, content.schema as OpenAPIV3.SchemaObject);
+
+							// Track non-2xx responses for error union type
+							if (!code.startsWith("2")) {
+								errorTypes.push(typeName);
+							}
 						}
 					}
+				}
+
+				// Generate error union type if there are error responses
+				if (errorTypes.length > 0) {
+					output += `export type ${pascalCase(operationId)}Error = ${errorTypes.join(" | ")};\n\n`;
 				}
 
 				// Build data type parts
@@ -92,7 +103,7 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 				const headerParams = (parameters?.filter((p) => "in" in p && p.in === "header") ||
 					[]) as OpenAPIV3.ParameterObject[];
 
-				// Add path and query parameters
+				// Add path, query, and header parameters
 				urlParams.forEach((p) => {
 					const safeName = sanitizePropertyName(p.name);
 					const isDeprecated = "deprecated" in p && p.deprecated;

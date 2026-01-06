@@ -34,9 +34,8 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 	// Add parameter descriptions
 	parameters?.forEach((param) => {
 		const desc = param.description ? ` - ${param.description}` : "";
-		jsDocLines.push(
-			` * @param ${param.in === "path" ? "params." : param.in === "query" ? "query." : ""}${param.name}${desc}`
-		);
+		const prefix = param.in === "path" ? "params." : param.in === "query" ? "query." : param.in === "header" ? "headers." : "";
+		jsDocLines.push(` * @param ${prefix}${param.name}${desc}`);
 	});
 
 	if (requestBody && "description" in requestBody) {
@@ -151,6 +150,9 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 				.join("\n			")}`
 			: "",
 		queryParams.length > 0 ? "axiosConfig.params = { ...axiosConfig.params, ...queryData };" : "",
+		headerParams.length > 0
+			? `axiosConfig.headers = { ...axiosConfig.headers, ${headerParams.map((p) => `["${p.name}"]: data["${p.name}"]`).join(", ")} };`
+			: "",
 		isFormData
 			? "axiosConfig.headers = { ...axiosConfig.headers, 'Content-Type': 'multipart/form-data' };"
 			: "",
