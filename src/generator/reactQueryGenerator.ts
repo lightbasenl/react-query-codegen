@@ -1,21 +1,15 @@
 import type { OpenAPIV3 } from "openapi-types";
-import { camelCase, sanitizeTypeName, specTitle } from "../utils";
-import type { OperationInfo } from "./clientGenerator";
-
-function resolveSchema(
-	schema: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject | undefined,
-	spec: OpenAPIV3.Document
-): OpenAPIV3.SchemaObject | undefined {
-	if (!schema) return undefined;
-	if ("$ref" in schema) {
-		const index = schema.$ref.split("/").pop();
-		return spec.components?.schemas?.[index as string] as OpenAPIV3.SchemaObject;
-	}
-	return schema;
-}
+import {
+	camelCase,
+	collectOperations,
+	getContentSchema,
+	type OperationInfo,
+	resolveSchema,
+	specTitle,
+} from "../utils";
 
 function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document): string {
-	const { operationId, parameters, requestBody, method } = operation;
+	const { operationId, parameters, requestBody } = operation;
 
 	const hasData = (parameters && parameters.length > 0) || operation.requestBody;
 
@@ -32,13 +26,7 @@ function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document
 		return schema.required?.map((p) => `'${p}'`) || [];
 	};
 
-	const content =
-		requestBody && "content" in requestBody
-			? (requestBody.content?.["application/ld+json"]?.schema ??
-				requestBody.content?.["application/json"]?.schema ??
-				requestBody.content?.["application/octet-stream"]?.schema)
-			: undefined;
-
+	const content = requestBody && "content" in requestBody ? getContentSchema(requestBody.content) : undefined;
 	const requestBodySchema = content ? resolveSchema(content, spec) : undefined;
 
 	// Check if request body is a primitive type (string, number, boolean)
@@ -104,30 +92,7 @@ export const ${namedQueryOptions} = (
 }
 
 export function generateReactQuery(spec: OpenAPIV3.Document): string {
-	const operations: OperationInfo[] = [];
-
-	// Collect operations (same as in clientGenerator)
-	Object.entries(spec.paths || {}).forEach(([path, pathItem]) => {
-		if (!pathItem) return;
-
-		["get", "post", "put", "delete", "patch"].forEach((method) => {
-			const operation = pathItem[method as keyof OpenAPIV3.PathItemObject] as OpenAPIV3.OperationObject;
-			if (!operation) return;
-			operations.push({
-				method: method,
-				path,
-				operationId: sanitizeTypeName(`${operation.operationId || `${path.replace(/\W+/g, "_")}`}`),
-				summary: operation.summary,
-				description: operation.description,
-				parameters: [
-					...(pathItem.parameters || []),
-					...(operation.parameters || []),
-				] as OpenAPIV3.ParameterObject[],
-				requestBody: operation.requestBody as OpenAPIV3.RequestBodyObject,
-				responses: operation.responses,
-			});
-		});
-	});
+	const operations = collectOperations(spec);
 
 	return `import { queryOptions, skipToken } from '@tanstack/react-query';
 	import * as apiClient from './${specTitle(spec)}.client';

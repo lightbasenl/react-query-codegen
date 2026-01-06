@@ -1,9 +1,26 @@
 import type { OpenAPIV3 } from "openapi-types";
-import { getTypeFromSchema, pascalCase, sanitizePropertyName, sanitizeTypeName } from "../utils";
+import { getContentSchema, getTypeFromSchema, pascalCase, sanitizePropertyName, sanitizeTypeName } from "../utils";
 
 interface SchemaContext {
 	schemas: { [key: string]: OpenAPIV3.SchemaObject };
 	generatedTypes: Set<string>;
+}
+
+/**
+ * Formats a parameter as a TypeScript property string with optional JSDoc.
+ */
+function formatParamProperty(param: OpenAPIV3.ParameterObject, forceRequired = false): string {
+	const safeName = sanitizePropertyName(param.name);
+	const isDeprecated = param.deprecated;
+	const hasDescription = param.description;
+	const isOptional = forceRequired ? false : !param.required;
+
+	const desc =
+		hasDescription || isDeprecated
+			? `/**${hasDescription ? `\n * ${param.description}` : ""}${isDeprecated ? "\n * @deprecated" : ""}\n */\n`
+			: "";
+
+	return `${desc}${safeName}${isOptional ? "?" : ""}: ${getTypeFromSchema(param.schema)}`;
 }
 
 function generateTypeDefinition(
@@ -54,15 +71,10 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 				// Generate request body type
 				if (requestBody) {
 					const content = (requestBody as OpenAPIV3.RequestBodyObject).content;
-					const jsonContent =
-						content["application/ld+json"] ??
-						content["application/json"] ??
-						content["multipart/form-data"] ??
-						content["application/octet-stream"] ??
-						content["application/json;charset=UTF-8"];
-					if (jsonContent?.schema) {
+					const requestSchema = getContentSchema(content);
+					if (requestSchema) {
 						const typeName = `${operationId}Request`;
-						output += generateTypeDefinition(typeName, jsonContent.schema as OpenAPIV3.SchemaObject);
+						output += generateTypeDefinition(typeName, requestSchema as OpenAPIV3.SchemaObject);
 					}
 				}
 
@@ -71,14 +83,10 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 				if (responses) {
 					for (const [code, response] of Object.entries(responses)) {
 						const responseObj = response as OpenAPIV3.ResponseObject;
-						const content =
-							responseObj.content?.["application/ld+json"] ??
-							responseObj.content?.["application/json"] ??
-							responseObj.content?.["application/octet-stream"] ??
-							responseObj.content?.["application/json;charset=UTF-8"];
-						if (content?.schema) {
+						const responseSchema = getContentSchema(responseObj.content);
+						if (responseSchema) {
 							const typeName = `${operationId}Response${code}`;
-							output += generateTypeDefinition(typeName, content.schema as OpenAPIV3.SchemaObject);
+							output += generateTypeDefinition(typeName, responseSchema as OpenAPIV3.SchemaObject);
 
 							// Track non-2xx responses for error union type
 							if (!code.startsWith("2")) {
@@ -104,41 +112,9 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 					[]) as OpenAPIV3.ParameterObject[];
 
 				// Add path, query, and header parameters
-				urlParams.forEach((p) => {
-					const safeName = sanitizePropertyName(p.name);
-					const isDeprecated = "deprecated" in p && p.deprecated;
-					const hasDescription = "description" in p && p.description;
-					const desc =
-						hasDescription || isDeprecated
-							? `/**${hasDescription ? `\n* ${p.description}` : ""}${isDeprecated ? "\n* @deprecated" : ""}
-							*/\n`
-							: "";
-					dataProps.push(`${desc}${safeName}: ${getTypeFromSchema(p.schema)}`);
-				});
-
-				queryParams.forEach((p) => {
-					const safeName = sanitizePropertyName(p.name);
-					const isDeprecated = "deprecated" in p && p.deprecated;
-					const hasDescription = "description" in p && p.description;
-					const desc =
-						hasDescription || isDeprecated
-							? `\n/**${hasDescription ? `\n* ${p.description}` : ""}${isDeprecated ? "\n* @deprecated" : ""}
-							*/\n`
-							: "";
-					dataProps.push(`${desc}${safeName}${p.required ? "" : "?"}: ${getTypeFromSchema(p.schema)}`);
-				});
-
-				headerParams.forEach((p) => {
-					const safeName = sanitizePropertyName(p.name);
-					const isDeprecated = "deprecated" in p && p.deprecated;
-					const hasDescription = "description" in p && p.description;
-					const desc =
-						hasDescription || isDeprecated
-							? `\n/**${hasDescription ? `\n* ${p.description}` : ""}${isDeprecated ? "\n* @deprecated" : ""}
-							*/\n`
-							: "";
-					dataProps.push(`${desc}${safeName}${p.required ? "" : "?"}: ${getTypeFromSchema(p.schema)}`);
-				});
+				urlParams.forEach((p) => dataProps.push(formatParamProperty(p, true))); // Path params always required
+				queryParams.forEach((p) => dataProps.push(formatParamProperty(p)));
+				headerParams.forEach((p) => dataProps.push(formatParamProperty(p)));
 
 				// Add request body type if it exists
 				const hasData = (parameters && parameters.length > 0) || requestBody;

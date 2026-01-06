@@ -1,5 +1,115 @@
 import type { OpenAPIV3 } from "openapi-types";
 
+/**
+ * Supported content types in order of preference
+ */
+export const CONTENT_TYPES = [
+	"application/ld+json",
+	"application/json",
+	"multipart/form-data",
+	"application/octet-stream",
+	"application/json;charset=UTF-8",
+] as const;
+
+/**
+ * Resolves a schema reference to its actual schema object.
+ * If the schema is already a concrete schema (not a $ref), returns it as-is.
+ */
+export function resolveSchema(
+	schema: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject | undefined,
+	spec: OpenAPIV3.Document
+): OpenAPIV3.SchemaObject | undefined {
+	if (!schema) return undefined;
+	if ("$ref" in schema) {
+		const index = schema.$ref.split("/").pop();
+		return spec.components?.schemas?.[index as string] as OpenAPIV3.SchemaObject;
+	}
+	return schema;
+}
+
+/**
+ * Extracts the schema from a content object, checking supported content types in order.
+ */
+export function getContentSchema(
+	content: { [media: string]: OpenAPIV3.MediaTypeObject } | undefined
+): OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined {
+	if (!content) return undefined;
+	for (const type of CONTENT_TYPES) {
+		if (content[type]?.schema) {
+			return content[type].schema;
+		}
+	}
+	return undefined;
+}
+
+/**
+ * Operation info extracted from OpenAPI paths
+ */
+export interface OperationInfo {
+	method: string;
+	path: string;
+	operationId: string;
+	summary?: string;
+	description?: string;
+	parameters: OpenAPIV3.ParameterObject[];
+	requestBody?: OpenAPIV3.RequestBodyObject;
+	responses: OpenAPIV3.ResponsesObject;
+}
+
+const HTTP_METHODS = ["get", "post", "put", "delete", "patch"] as const;
+
+/**
+ * Collects all operations from an OpenAPI spec, resolving parameter and request body references.
+ */
+export function collectOperations(spec: OpenAPIV3.Document): OperationInfo[] {
+	const operations: OperationInfo[] = [];
+
+	const resolveParameters = (
+		parameters: (OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject)[]
+	): OpenAPIV3.ParameterObject[] => {
+		return parameters.map((p) => {
+			if ("$ref" in p) {
+				const index = p.$ref.split("/").pop();
+				return spec.components?.parameters?.[index as string] as OpenAPIV3.ParameterObject;
+			}
+			return p;
+		});
+	};
+
+	const resolveRequestBody = (
+		requestBody: OpenAPIV3.RequestBodyObject | OpenAPIV3.ReferenceObject | undefined
+	): OpenAPIV3.RequestBodyObject | undefined => {
+		if (!requestBody) return undefined;
+		if ("$ref" in requestBody) {
+			const index = requestBody.$ref.split("/").pop();
+			return spec.components?.requestBodies?.[index as string] as OpenAPIV3.RequestBodyObject;
+		}
+		return requestBody;
+	};
+
+	Object.entries(spec.paths || {}).forEach(([path, pathItem]) => {
+		if (!pathItem) return;
+
+		HTTP_METHODS.forEach((method) => {
+			const operation = pathItem[method] as OpenAPIV3.OperationObject | undefined;
+			if (!operation) return;
+
+			operations.push({
+				method,
+				path,
+				operationId: sanitizeTypeName(operation.operationId || path.replace(/\W+/g, "_")),
+				summary: operation.summary,
+				description: operation.description,
+				parameters: resolveParameters([...(pathItem.parameters || []), ...(operation.parameters || [])]),
+				requestBody: resolveRequestBody(operation.requestBody),
+				responses: operation.responses,
+			});
+		});
+	});
+
+	return operations;
+}
+
 export function camelCase(str: string): string {
 	return str
 		.replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
@@ -91,9 +201,7 @@ export function getTypeFromSchema(
 
 	// Handle allOf (intersection types)
 	if ("allOf" in schema && schema.allOf) {
-		const types = schema.allOf
-			.map((s) => getTypeFromSchema(s))
-			.filter(Boolean) as string[];
+		const types = schema.allOf.map((s) => getTypeFromSchema(s)).filter(Boolean) as string[];
 		if (types.length === 0) return "any";
 		const result = types.length === 1 ? types[0] : `(${types.join(" & ")})`;
 		return `${result}${nullable}`;
@@ -101,9 +209,7 @@ export function getTypeFromSchema(
 
 	// Handle oneOf (union types - exactly one)
 	if ("oneOf" in schema && schema.oneOf) {
-		const types = schema.oneOf
-			.map((s) => getTypeFromSchema(s))
-			.filter(Boolean) as string[];
+		const types = schema.oneOf.map((s) => getTypeFromSchema(s)).filter(Boolean) as string[];
 		if (types.length === 0) return "any";
 		const result = types.length === 1 ? types[0] : `(${types.join(" | ")})`;
 		return `${result}${nullable}`;
@@ -111,9 +217,7 @@ export function getTypeFromSchema(
 
 	// Handle anyOf (union types - one or more)
 	if ("anyOf" in schema && schema.anyOf) {
-		const types = schema.anyOf
-			.map((s) => getTypeFromSchema(s))
-			.filter(Boolean) as string[];
+		const types = schema.anyOf.map((s) => getTypeFromSchema(s)).filter(Boolean) as string[];
 		if (types.length === 0) return "any";
 		const result = types.length === 1 ? types[0] : `(${types.join(" | ")})`;
 		return `${result}${nullable}`;
@@ -129,14 +233,6 @@ export function getTypeFromSchema(
 			);
 		}
 		return schema.enum.map((e) => (typeof e === "string" ? `'${e}'` : e)).join(" | ") + nullable;
-	}
-
-	// Handle oneOf as union types
-	if ("oneOf" in schema && schema.oneOf) {
-		const unionTypes = schema.oneOf
-			.map((subSchema) => getTypeFromSchema(subSchema))
-			.filter((type): type is string => type !== undefined);
-		return unionTypes.length > 0 ? `${unionTypes.join(" | ")}${nullable}` : `any${nullable}`;
 	}
 
 	// Handle types based on the "type" property
