@@ -1,11 +1,6 @@
 import type { OpenAPIV3 } from "openapi-types";
 import { getContentSchema, getTypeFromSchema, pascalCase, sanitizePropertyName, sanitizeTypeName } from "../utils";
 
-interface SchemaContext {
-	schemas: { [key: string]: OpenAPIV3.SchemaObject };
-	generatedTypes: Set<string>;
-}
-
 /**
  * Formats a parameter as a TypeScript property string with optional JSDoc.
  */
@@ -43,18 +38,16 @@ function generateTypeDefinition(
  * Generates TypeScript interface definitions from OpenAPI schemas
  */
 export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
-	const context: SchemaContext = {
-		schemas: (spec.components?.schemas as { [key: string]: OpenAPIV3.SchemaObject }) || {},
-		generatedTypes: new Set(),
-	};
+	const schemas = (spec.components?.schemas as { [key: string]: OpenAPIV3.SchemaObject }) || {};
+	const generatedTypes = new Set<string>();
 
 	let output = "/* Generated TypeScript Definitions */\n\n";
 
 	// Generate types for all schema definitions
-	for (const [name, schema] of Object.entries(context.schemas)) {
-		if (context.generatedTypes.has(name)) continue;
+	for (const [name, schema] of Object.entries(schemas)) {
+		if (generatedTypes.has(name)) continue;
 		output += generateTypeDefinition(name, schema);
-		context.generatedTypes.add(name);
+		generatedTypes.add(name);
 	}
 
 	// Generate request/response types
