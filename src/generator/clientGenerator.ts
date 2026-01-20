@@ -10,9 +10,11 @@ import {
 } from "../utils";
 
 function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document): string {
-	const { method, path, operationId, summary, description, parameters, requestBody, responses } = operation;
+	const { method, path, operationId, summary, description, deprecated, parameters, requestBody, responses } =
+		operation;
 	// Generate JSDoc
 	const jsDocLines = ["/**"];
+	if (deprecated) jsDocLines.push(" * @deprecated");
 	if (summary) jsDocLines.push(` * ${summary}`);
 	if (description) jsDocLines.push(` * ${description}`);
 
@@ -26,7 +28,9 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 					? "query."
 					: param.in === "header"
 						? "headers."
-						: "";
+						: param.in === "cookie"
+							? "cookies."
+							: "";
 		jsDocLines.push(` * @param ${prefix}${param.name}${desc}`);
 	});
 
@@ -34,8 +38,10 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		jsDocLines.push(` * @param data - ${requestBody.description}`);
 	}
 
-	// Add return type description
-	const responseDetails = Object.entries(responses).find(([code]) => code.startsWith("2"));
+	// Add return type description - prefer 2xx responses, fall back to "default"
+	const responseDetails =
+		Object.entries(responses).find(([code]) => code.startsWith("2")) ||
+		Object.entries(responses).find(([code]) => code === "default");
 	if (responseDetails) {
 		const [code, response] = responseDetails;
 		const responseObj = response as OpenAPIV3.ResponseObject;
@@ -58,6 +64,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 	const urlParams = parameters?.filter((p) => p.in === "path") || [];
 	const queryParams = parameters?.filter((p) => p.in === "query") || [];
 	const headerParams = parameters?.filter((p) => p.in === "header") || [];
+	const cookieParams = parameters?.filter((p) => p.in === "cookie") || [];
 
 	const isFormData = requestBody && "content" in requestBody && requestBody.content?.["multipart/form-data"];
 
@@ -82,11 +89,19 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 	const namedType = pascalCase(operationId);
 
 	// Get response type from 2xx response
-
-	const responseType =
-		responseDetails?.[0] && "content" in responseDetails[1]
-			? `T.${`${namedType}Response${responseDetails[0]}`}`
-			: "unknown";
+	const responseType = (() => {
+		if (!responseDetails) return "unknown";
+		const [code, response] = responseDetails;
+		// If response has content, use the generated type
+		if ("content" in response && response.content) {
+			return `T.${namedType}Response${code}`;
+		}
+		// 204 (No Content) and 205 (Reset Content) should return void
+		if (code === "204" || code === "205") {
+			return "void";
+		}
+		return "unknown";
+	})();
 
 	const urlWithParams =
 		urlParams.length > 0 ? `\`${path.replace(/{(\w+)}/g, "${encodeURIComponent(data.$1)}")}\`` : `"${path}"`;
@@ -134,13 +149,18 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		headerParams.length > 0
 			? `axiosConfig.headers = { ...axiosConfig.headers, ${headerParams.map((p) => `["${p.name}"]: data["${p.name}"]`).join(", ")} };`
 			: "",
-		isFormData
-			? "axiosConfig.headers = { ...axiosConfig.headers, 'Content-Type': 'multipart/form-data' };"
+		cookieParams.length > 0
+			? `axiosConfig.headers = { ...axiosConfig.headers, Cookie: [${cookieParams.map((p) => `data["${p.name}"] != null ? \`${p.name}=\${data["${p.name}"]}\` : null`).join(", ")}].filter(Boolean).join("; ") };`
 			: "",
+		// Note: Don't set Content-Type for FormData - Axios will set it automatically with the correct boundary
 		requestBody
-			? `const res = await apiClient.${method}<${responseType}>(url, ${formDataSchema?.properties || requestBodySchema?.properties ? "bodyData" : "data"}, axiosConfig);`
-			: `const res = await apiClient.${method}<${responseType}>(url, axiosConfig);`,
-		"return res.data;",
+			? responseType === "void"
+				? `await apiClient.${method}<${responseType}>(url, ${formDataSchema?.properties || requestBodySchema?.properties ? "bodyData" : "data"}, axiosConfig);`
+				: `const res = await apiClient.${method}<${responseType}>(url, ${formDataSchema?.properties || requestBodySchema?.properties ? "bodyData" : "data"}, axiosConfig);`
+			: responseType === "void"
+				? `await apiClient.${method}<${responseType}>(url, axiosConfig);`
+				: `const res = await apiClient.${method}<${responseType}>(url, axiosConfig);`,
+		responseType !== "void" ? "return res.data;" : "",
 	]
 		.filter(Boolean)
 		.join("\n	");

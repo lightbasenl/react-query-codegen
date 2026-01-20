@@ -6,6 +6,7 @@ import type { OpenAPIV3 } from "openapi-types";
 export const CONTENT_TYPES = [
 	"application/ld+json",
 	"application/json",
+	"text/plain",
 	"multipart/form-data",
 	"application/octet-stream",
 	"application/json;charset=UTF-8",
@@ -51,6 +52,7 @@ export interface OperationInfo {
 	operationId: string;
 	summary?: string;
 	description?: string;
+	deprecated?: boolean;
 	parameters: OpenAPIV3.ParameterObject[];
 	requestBody?: OpenAPIV3.RequestBodyObject;
 	responses: OpenAPIV3.ResponsesObject;
@@ -100,6 +102,7 @@ export function collectOperations(spec: OpenAPIV3.Document): OperationInfo[] {
 				operationId: sanitizeTypeName(operation.operationId || path.replace(/\W+/g, "_")),
 				summary: operation.summary,
 				description: operation.description,
+				deprecated: operation.deprecated,
 				parameters: resolveParameters([...(pathItem.parameters || []), ...(operation.parameters || [])]),
 				requestBody: resolveRequestBody(operation.requestBody),
 				responses: operation.responses,
@@ -202,7 +205,7 @@ export function getTypeFromSchema(
 	// Handle allOf (intersection types)
 	if ("allOf" in schema && schema.allOf) {
 		const types = schema.allOf.map((s) => getTypeFromSchema(s)).filter(Boolean) as string[];
-		if (types.length === 0) return "any";
+		if (types.length === 0) return "unknown";
 		const result = types.length === 1 ? types[0] : `(${types.join(" & ")})`;
 		return `${result}${nullable}`;
 	}
@@ -210,7 +213,7 @@ export function getTypeFromSchema(
 	// Handle oneOf (union types - exactly one)
 	if ("oneOf" in schema && schema.oneOf) {
 		const types = schema.oneOf.map((s) => getTypeFromSchema(s)).filter(Boolean) as string[];
-		if (types.length === 0) return "any";
+		if (types.length === 0) return "unknown";
 		const result = types.length === 1 ? types[0] : `(${types.join(" | ")})`;
 		return `${result}${nullable}`;
 	}
@@ -218,7 +221,7 @@ export function getTypeFromSchema(
 	// Handle anyOf (union types - one or more)
 	if ("anyOf" in schema && schema.anyOf) {
 		const types = schema.anyOf.map((s) => getTypeFromSchema(s)).filter(Boolean) as string[];
-		if (types.length === 0) return "any";
+		if (types.length === 0) return "unknown";
 		const result = types.length === 1 ? types[0] : `(${types.join(" | ")})`;
 		return `${result}${nullable}`;
 	}
@@ -282,19 +285,19 @@ export function getTypeFromSchema(
 				if (schema.additionalProperties) {
 					const valueType =
 						typeof schema.additionalProperties === "boolean"
-							? "any"
+							? "unknown"
 							: getTypeFromSchema(schema.additionalProperties);
 					return `Record<string, ${valueType}>${nullable}`;
 				}
 
 				// Default object type when no properties specified
-				return `Record<string, any>${nullable}`;
+				return `Record<string, unknown>${nullable}`;
 
 			default:
-				return `any${nullable}`;
+				return `unknown${nullable}`;
 		}
 	}
 
 	// Fallback for schemas without a type
-	return "any";
+	return "unknown";
 }
