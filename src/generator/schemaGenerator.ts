@@ -109,11 +109,14 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 					[]) as OpenAPIV3.ParameterObject[];
 				const headerParams = (parameters?.filter((p) => "in" in p && p.in === "header") ||
 					[]) as OpenAPIV3.ParameterObject[];
+				const cookieParams = (parameters?.filter((p) => "in" in p && p.in === "cookie") ||
+					[]) as OpenAPIV3.ParameterObject[];
 
-				// Add path, query, and header parameters
+				// Add path, query, header, and cookie parameters
 				urlParams.forEach((p) => dataProps.push(formatParamProperty(p, true))); // Path params always required
 				queryParams.forEach((p) => dataProps.push(formatParamProperty(p)));
 				headerParams.forEach((p) => dataProps.push(formatParamProperty(p)));
+				cookieParams.forEach((p) => dataProps.push(formatParamProperty(p)));
 
 				// Add request body type if it exists
 				const hasData = (parameters && parameters.length > 0) || requestBody;

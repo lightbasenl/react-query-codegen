@@ -9,7 +9,7 @@ import {
 } from "../utils";
 
 function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document): string {
-	const { operationId, parameters, requestBody } = operation;
+	const { operationId, parameters, requestBody, deprecated } = operation;
 
 	const hasData = (parameters && parameters.length > 0) || operation.requestBody;
 
@@ -78,8 +78,10 @@ function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document
 			: `hasDefinedProps(${paramsVariable}, ${requiredParams.join(", ")})`
 		: "true";
 
+	const deprecatedComment = deprecated ? "/** @deprecated */\n" : "";
+
 	return `
-export const ${namedQueryOptions} = ( 
+${deprecatedComment}export const ${namedQueryOptions} = (
   ${hasData ? `props: Partial<Parameters<typeof apiClient.${namedQuery}>[0]>` : `props?: Partial<Parameters<typeof apiClient.${namedQuery}>[0]>`}
 ) => {
   ${destructuringLine}
@@ -96,10 +98,8 @@ export function generateReactQuery(spec: OpenAPIV3.Document): string {
 
 	return `import { queryOptions, skipToken } from '@tanstack/react-query';
 	import * as apiClient from './${specTitle(spec)}.client';
-	// TEMPORARY: allows for backward compatibility imports
-	export * from './${specTitle(spec)}.client';
 
-const hasDefinedProps = <T extends { [P in K]?: any }, K extends PropertyKey>(
+const hasDefinedProps = <T extends { [P in K]?: unknown }, K extends PropertyKey>(
   obj: T,
   ...keys: K[]
 ): obj is T & { [P in K]-?: Exclude<T[P], undefined> } => {
