@@ -123,7 +123,7 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		};`
 			: "",
 
-		requestBodySchema?.properties
+		requestBodySchema?.properties && !formDataSchema?.properties
 			? `const bodyData = {
 				${Object.entries(requestBodySchema.properties)
 					.map(([key]) => `["${key}"]: data["${key}"]`)

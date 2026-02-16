@@ -37,18 +37,19 @@ function generateQueryOptions(operation: OperationInfo, spec: OpenAPIV3.Document
 		!requestBodySchema.type?.includes("array");
 
 	// Get required parameter names from both parameters and request body
+	const isFormData = requestBody && "content" in requestBody && requestBody.content?.["multipart/form-data"];
 	const requiredParams = [
 		...(parameters?.filter((p) => p.required).map((p) => `'${p.name}'`) || []),
-		...(content
-			? getRequiredFields(content, {
-					schemas: (spec.components?.schemas as { [key: string]: OpenAPIV3.SchemaObject }) || {},
-				})
-			: []),
-		...(requestBody && "content" in requestBody && requestBody.content?.["multipart/form-data"]?.schema
+		// Use formData schema for required fields when multipart/form-data, otherwise use content schema
+		...(isFormData && requestBody.content["multipart/form-data"].schema
 			? getRequiredFields(requestBody.content["multipart/form-data"].schema, {
 					schemas: (spec.components?.schemas as { [key: string]: OpenAPIV3.SchemaObject }) || {},
 				})
-			: []),
+			: content
+				? getRequiredFields(content, {
+						schemas: (spec.components?.schemas as { [key: string]: OpenAPIV3.SchemaObject }) || {},
+					})
+				: []),
 	];
 
 	const namedQueryOptions = camelCase(`get${operationId}QueryOptions`);
