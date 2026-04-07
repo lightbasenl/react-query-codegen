@@ -228,14 +228,19 @@ export function getTypeFromSchema(
 
 	// Handle enums as union types
 	if ("enum" in schema && schema.enum) {
+		// Filter out null/undefined enum values (some specs include null for nullable enums)
+		const hasNull = schema.enum.some((e) => e === null);
+		const nullSuffix = hasNull ? " | null" : "";
 		if (Object.values(schema.enum)?.length > 0) {
-			return (
-				Object.values(schema.enum)
-					.map((e) => (typeof e === "string" ? `'${e}'` : e))
-					.join(" | ") + nullable
-			);
+			const values = Object.values(schema.enum)
+				.filter((e) => e != null)
+				.map((e) => (typeof e === "string" ? `'${e}'` : e));
+			if (values.length === 0) return `unknown${nullable}`;
+			return values.join(" | ") + nullSuffix + nullable;
 		}
-		return schema.enum.map((e) => (typeof e === "string" ? `'${e}'` : e)).join(" | ") + nullable;
+		const values = schema.enum.filter((e) => e != null).map((e) => (typeof e === "string" ? `'${e}'` : e));
+		if (values.length === 0) return `unknown${nullable}`;
+		return values.join(" | ") + nullSuffix + nullable;
 	}
 
 	// Handle types based on the "type" property
