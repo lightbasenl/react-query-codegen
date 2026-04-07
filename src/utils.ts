@@ -239,6 +239,17 @@ export function getTypeFromSchema(
 
 	// Handle types based on the "type" property
 	if ("type" in schema) {
+		// OpenAPI 3.1 supports type as an array, e.g. ["string", "null"]
+		if (Array.isArray(schema.type)) {
+			const types = (schema.type as string[]).filter((t) => t !== "null");
+			const hasNull = (schema.type as string[]).includes("null");
+			const nullSuffix = hasNull ? " | null" : "";
+			if (types.length === 0) return `unknown${nullable}`;
+			// Resolve each type individually by recursing with a single-type schema
+			const resolved = types.map((t) => getTypeFromSchema({ ...schema, type: t } as OpenAPIV3.SchemaObject));
+			return resolved.filter(Boolean).join(" | ") + nullSuffix + nullable;
+		}
+
 		switch (schema.type) {
 			case "string":
 				// Special case for binary format strings
