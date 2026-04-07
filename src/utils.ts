@@ -239,6 +239,9 @@ export function getTypeFromSchema(
 
 	// Handle types based on the "type" property
 	if ("type" in schema) {
+		// OpenAPI 3.1 "null" type (e.g. in anyOf: [{ $ref: "..." }, { type: "null" }])
+		if ((schema.type as string) === "null") return "null";
+
 		// OpenAPI 3.1 supports type as an array, e.g. ["string", "null"]
 		if (Array.isArray(schema.type)) {
 			const types = (schema.type as string[]).filter((t) => t !== "null");
