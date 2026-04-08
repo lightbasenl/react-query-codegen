@@ -88,7 +88,7 @@ ${deprecatedComment}export const ${namedQueryOptions} = (
   ${destructuringLine}
   const enabled = ${enabledLogic};
   return queryOptions({
-    queryKey: ['${camelCase(operationId)}', ${queryKeyParams}],
+    queryKey: ['${camelCase(operationId)}', ${queryKeyParams}, axiosConfig?.params],
     queryFn: enabled ? () => apiClient.${namedQuery}(${functionCall}) : skipToken,
   });
 };`;
