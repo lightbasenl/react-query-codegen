@@ -1,5 +1,6 @@
 import type { OpenAPIV3 } from "openapi-types";
 import {
+	collectOperations,
 	getContentSchema,
 	getTypeFromSchema,
 	pascalCase,
@@ -56,86 +57,71 @@ export function generateTypeDefinitions(spec: OpenAPIV3.Document): string {
 		generatedTypes.add(name);
 	}
 
-	// Generate request/response types
-	if (spec.paths) {
-		for (const [path, pathItem] of Object.entries(spec.paths)) {
-			for (const [method, operation] of Object.entries(pathItem as OpenAPIV3.PathItemObject)) {
-				if (method === "$ref") continue;
+	// Generate request/response types. Use the same operation-collection helper as the
+	// client generator so pathItem-level parameters and $ref parameters stay in sync.
+	for (const { operationId, parameters, requestBody, responses } of collectOperations(spec)) {
+		// Generate request body type
+		if (requestBody) {
+			const requestSchema = getContentSchema(requestBody.content);
+			if (requestSchema) {
+				const typeName = `${operationId}Request`;
+				output += generateTypeDefinition(typeName, requestSchema as OpenAPIV3.SchemaObject);
+			}
+		}
 
-				const operationObject = operation as OpenAPIV3.OperationObject;
-				if (!operationObject) continue;
-				const { operationId: badOperationId, requestBody, responses, parameters } = operationObject;
-				const operationId = `${sanitizeTypeName(badOperationId || `${path.replace(/\W+/g, "_")}`)}`;
+		// Generate response types
+		const errorTypes: string[] = [];
+		if (responses) {
+			for (const [code, response] of Object.entries(responses)) {
+				const responseObj = response as OpenAPIV3.ResponseObject;
+				const responseSchema = getContentSchema(responseObj.content);
+				if (responseSchema) {
+					const typeName = `${operationId}Response${code}`;
+					output += generateTypeDefinition(typeName, responseSchema as OpenAPIV3.SchemaObject);
 
-				// Generate request body type
-				if (requestBody) {
-					const content = (requestBody as OpenAPIV3.RequestBodyObject).content;
-					const requestSchema = getContentSchema(content);
-					if (requestSchema) {
-						const typeName = `${operationId}Request`;
-						output += generateTypeDefinition(typeName, requestSchema as OpenAPIV3.SchemaObject);
+					// Track non-2xx responses for error union type
+					if (!code.startsWith("2")) {
+						errorTypes.push(typeName);
 					}
-				}
-
-				// Generate response types
-				const errorTypes: string[] = [];
-				if (responses) {
-					for (const [code, response] of Object.entries(responses)) {
-						const responseObj = response as OpenAPIV3.ResponseObject;
-						const responseSchema = getContentSchema(responseObj.content);
-						if (responseSchema) {
-							const typeName = `${operationId}Response${code}`;
-							output += generateTypeDefinition(typeName, responseSchema as OpenAPIV3.SchemaObject);
-
-							// Track non-2xx responses for error union type
-							if (!code.startsWith("2")) {
-								errorTypes.push(typeName);
-							}
-						}
-					}
-				}
-
-				// Generate error union type if there are error responses
-				if (errorTypes.length > 0) {
-					output += `export type ${pascalCase(operationId)}Error = ${errorTypes.join(" | ")};\n\n`;
-				}
-
-				// Build data type parts
-				const dataProps: string[] = [];
-
-				const urlParams = (parameters?.filter((p) => "in" in p && p.in === "path") ||
-					[]) as OpenAPIV3.ParameterObject[];
-				const queryParams = (parameters?.filter((p) => "in" in p && p.in === "query") ||
-					[]) as OpenAPIV3.ParameterObject[];
-				const headerParams = (parameters?.filter((p) => "in" in p && p.in === "header") ||
-					[]) as OpenAPIV3.ParameterObject[];
-				const cookieParams = (parameters?.filter((p) => "in" in p && p.in === "cookie") ||
-					[]) as OpenAPIV3.ParameterObject[];
-
-				// Add path, query, header, and cookie parameters
-				urlParams.forEach((p) => dataProps.push(formatParamProperty(p, true))); // Path params always required
-				queryParams.forEach((p) => dataProps.push(formatParamProperty(p)));
-				headerParams.forEach((p) => dataProps.push(formatParamProperty(p)));
-				cookieParams.forEach((p) => dataProps.push(formatParamProperty(p)));
-
-				// Add request body type if it exists
-				const hasData = (parameters && parameters.length > 0) || requestBody;
-
-				let dataType = "undefined";
-				const namedType = pascalCase(operationId);
-				if (hasData) {
-					if (requestBody && dataProps.length > 0) {
-						dataType = `${namedType}Request & { ${dataProps.join("; ")} }`;
-					} else if (requestBody) {
-						dataType = `${namedType}Request`;
-					} else if (dataProps.length > 0) {
-						dataType = `{ ${dataProps.join("; ")} }`;
-					} else {
-						dataType = "Record<string, never>";
-					}
-					output += `\n\nexport type ${pascalCase(operationId)}Params = ${dataType};\n\n`;
 				}
 			}
+		}
+
+		// Generate error union type if there are error responses
+		if (errorTypes.length > 0) {
+			output += `export type ${pascalCase(operationId)}Error = ${errorTypes.join(" | ")};\n\n`;
+		}
+
+		// Build data type parts
+		const dataProps: string[] = [];
+
+		const urlParams = parameters.filter((p) => p.in === "path");
+		const queryParams = parameters.filter((p) => p.in === "query");
+		const headerParams = parameters.filter((p) => p.in === "header");
+		const cookieParams = parameters.filter((p) => p.in === "cookie");
+
+		// Add path, query, header, and cookie parameters
+		urlParams.forEach((p) => dataProps.push(formatParamProperty(p, true))); // Path params always required
+		queryParams.forEach((p) => dataProps.push(formatParamProperty(p)));
+		headerParams.forEach((p) => dataProps.push(formatParamProperty(p)));
+		cookieParams.forEach((p) => dataProps.push(formatParamProperty(p)));
+
+		// Add request body type if it exists
+		const hasData = parameters.length > 0 || requestBody;
+
+		let dataType = "undefined";
+		const namedType = pascalCase(operationId);
+		if (hasData) {
+			if (requestBody && dataProps.length > 0) {
+				dataType = `${namedType}Request & { ${dataProps.join("; ")} }`;
+			} else if (requestBody) {
+				dataType = `${namedType}Request`;
+			} else if (dataProps.length > 0) {
+				dataType = `{ ${dataProps.join("; ")} }`;
+			} else {
+				dataType = "Record<string, never>";
+			}
+			output += `\n\nexport type ${pascalCase(operationId)}Params = ${dataType};\n\n`;
 		}
 	}
 

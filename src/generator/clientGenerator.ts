@@ -9,6 +9,34 @@ import {
 	specTitle,
 } from "../utils";
 
+/**
+ * Walks a request body schema (including allOf/oneOf/anyOf composition) and returns
+ * the union of property names contributed by all branches. Used to pick body fields
+ * out of the merged Params object so path/query/header values aren't sent as the body.
+ */
+function collectBodyPropertyNames(
+	schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | undefined,
+	spec: OpenAPIV3.Document,
+	visitedRefs: Set<string> = new Set()
+): string[] {
+	if (!schema) return [];
+	if ("$ref" in schema) {
+		if (visitedRefs.has(schema.$ref)) return [];
+		const next = new Set(visitedRefs).add(schema.$ref);
+		return collectBodyPropertyNames(resolveSchema(schema, spec), spec, next);
+	}
+	const names = new Set<string>();
+	if (schema.properties) Object.keys(schema.properties).forEach((k) => names.add(k));
+	for (const key of ["allOf", "oneOf", "anyOf"] as const) {
+		const branches = schema[key];
+		if (!branches) continue;
+		for (const branch of branches) {
+			collectBodyPropertyNames(branch, spec, visitedRefs).forEach((n) => names.add(n));
+		}
+	}
+	return Array.from(names);
+}
+
 function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document): string {
 	const { method, path, operationId, summary, description, deprecated, parameters, requestBody, responses } =
 		operation;
@@ -76,10 +104,15 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		requestBody && "content" in requestBody ? getContentSchema(requestBody.content) : undefined;
 	const requestBodySchema = requestBodyContent ? resolveSchema(requestBodyContent, spec) : undefined;
 
+	// Resolve property names contributed by the body schema, walking allOf/oneOf/anyOf so
+	// composition-based bodies are still treated as object bodies (not "primitive").
+	const bodyPropertyNames = requestBodySchema ? collectBodyPropertyNames(requestBodySchema, spec) : [];
+	const hasObjectBody = bodyPropertyNames.length > 0;
+
 	// Check if request body is a primitive type (string, number, boolean)
 	const isPrimitiveRequestBody =
 		requestBodySchema &&
-		!requestBodySchema.properties &&
+		!hasObjectBody &&
 		!requestBodySchema.type?.includes("object") &&
 		!requestBodySchema.type?.includes("array");
 
@@ -123,11 +156,9 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		};`
 			: "",
 
-		requestBodySchema?.properties && !formDataSchema?.properties
+		hasObjectBody && !formDataSchema?.properties
 			? `const bodyData = {
-				${Object.entries(requestBodySchema.properties)
-					.map(([key]) => `["${key}"]: data["${key}"]`)
-					.join(",\n				")}
+				${bodyPropertyNames.map((key) => `["${key}"]: data["${key}"]`).join(",\n				")}
 			};`
 			: "",
 
@@ -155,8 +186,8 @@ function generateAxiosMethod(operation: OperationInfo, spec: OpenAPIV3.Document)
 		// Note: Don't set Content-Type for FormData - Axios will set it automatically with the correct boundary
 		requestBody
 			? responseType === "void"
-				? `await apiClient.${method}<${responseType}>(url, ${formDataSchema?.properties || requestBodySchema?.properties ? "bodyData" : "data"}, axiosConfig);`
-				: `const res = await apiClient.${method}<${responseType}>(url, ${formDataSchema?.properties || requestBodySchema?.properties ? "bodyData" : "data"}, axiosConfig);`
+				? `await apiClient.${method}<${responseType}>(url, ${formDataSchema?.properties || hasObjectBody ? "bodyData" : "data"}, axiosConfig);`
+				: `const res = await apiClient.${method}<${responseType}>(url, ${formDataSchema?.properties || hasObjectBody ? "bodyData" : "data"}, axiosConfig);`
 			: responseType === "void"
 				? `await apiClient.${method}<${responseType}>(url, axiosConfig);`
 				: `const res = await apiClient.${method}<${responseType}>(url, axiosConfig);`,
