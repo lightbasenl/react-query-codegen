@@ -31,11 +31,11 @@ function generateTypeDefinition(
 	const description = !("$ref" in schema) && schema.description ? `/**\n * ${schema.description}\n */\n` : "";
 	const typeValue = getTypeFromSchema(schema);
 
-	// Use 'type' for primitives, unions, and simple types
-	// Use 'interface' only for complex objects with properties
-	const isInterface = !("$ref" in schema) && schema.type === "object" && schema.properties;
+	// Only emit `interface` when the body is a plain object literal. Composition
+	// (allOf/oneOf/anyOf) produces references or intersections that must use a type alias.
+	const canBeInterface = typeValue?.trimStart().startsWith("{");
 
-	return isInterface
+	return canBeInterface
 		? `${description}export interface ${sanitizeTypeName(name)} ${typeValue}\n\n`
 		: `${description}export type ${sanitizeTypeName(name)} = ${typeValue}\n\n`;
 }

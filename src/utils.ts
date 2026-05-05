@@ -171,6 +171,41 @@ export function specTitle(spec: OpenAPIV3.Document): string {
 }
 
 /**
+ * Builds the object-literal fragment ({...} or Record<...>) from a schema's own
+ * `properties` or `additionalProperties`, ignoring composition keywords. Returns
+ * undefined when the schema contributes no own object shape.
+ */
+function getOwnObjectFragment(schema: OpenAPIV3.SchemaObject): string | undefined {
+	if (schema.properties && Object.keys(schema.properties).length > 0) {
+		const properties = Object.entries(schema.properties)
+			.map(([key, prop]) => {
+				const isRequired = schema.required?.includes(key);
+				const propertyType = getTypeFromSchema(prop);
+				const safeName = sanitizePropertyName(key);
+				const isDeprecated = "deprecated" in prop && prop.deprecated;
+				const hasDescription = "description" in prop && prop.description;
+				const desc =
+					hasDescription || isDeprecated
+						? `/**${hasDescription ? `\n * ${prop.description}` : ""}${isDeprecated ? "\n * @deprecated" : ""}\n */\n`
+						: "";
+				return `${desc}${safeName}${isRequired ? "" : "?"}: ${propertyType};`;
+			})
+			.join("\n");
+		return `{${properties}\n}`;
+	}
+
+	if (schema.additionalProperties) {
+		const valueType =
+			typeof schema.additionalProperties === "boolean"
+				? "unknown"
+				: getTypeFromSchema(schema.additionalProperties);
+		return `Record<string, ${valueType}>`;
+	}
+
+	return undefined;
+}
+
+/**
  * Converts an OpenAPI schema object into a TypeScript type string.
  *
  * Handles:
@@ -202,28 +237,35 @@ export function getTypeFromSchema(
 	// Add "| null" for nullable types
 	const nullable = "nullable" in schema && schema.nullable ? " | null" : "";
 
+	// Sibling properties / additionalProperties may appear next to allOf/oneOf/anyOf.
+	// Per the OpenAPI spec they constrain the parent and must be intersected with the composition.
+	const ownObjectFragment = getOwnObjectFragment(schema as OpenAPIV3.SchemaObject);
+
 	// Handle allOf (intersection types)
 	if ("allOf" in schema && schema.allOf) {
-		const types = schema.allOf.map((s) => getTypeFromSchema(s)).filter(Boolean) as string[];
-		if (types.length === 0) return "unknown";
-		const result = types.length === 1 ? types[0] : `(${types.join(" & ")})`;
+		const parts = schema.allOf.map((s) => getTypeFromSchema(s)).filter(Boolean) as string[];
+		if (ownObjectFragment) parts.push(ownObjectFragment);
+		if (parts.length === 0) return "unknown";
+		const result = parts.length === 1 ? parts[0] : `(${parts.join(" & ")})`;
 		return `${result}${nullable}`;
 	}
 
 	// Handle oneOf (union types - exactly one)
 	if ("oneOf" in schema && schema.oneOf) {
 		const types = schema.oneOf.map((s) => getTypeFromSchema(s)).filter(Boolean) as string[];
-		if (types.length === 0) return "unknown";
-		const result = types.length === 1 ? types[0] : `(${types.join(" | ")})`;
-		return `${result}${nullable}`;
+		if (types.length === 0 && !ownObjectFragment) return "unknown";
+		const union = types.length === 1 ? types[0] : `(${types.join(" | ")})`;
+		const composed = ownObjectFragment ? `(${union} & ${ownObjectFragment})` : union;
+		return `${composed}${nullable}`;
 	}
 
 	// Handle anyOf (union types - one or more)
 	if ("anyOf" in schema && schema.anyOf) {
 		const types = schema.anyOf.map((s) => getTypeFromSchema(s)).filter(Boolean) as string[];
-		if (types.length === 0) return "unknown";
-		const result = types.length === 1 ? types[0] : `(${types.join(" | ")})`;
-		return `${result}${nullable}`;
+		if (types.length === 0 && !ownObjectFragment) return "unknown";
+		const union = types.length === 1 ? types[0] : `(${types.join(" | ")})`;
+		const composed = ownObjectFragment ? `(${union} & ${ownObjectFragment})` : union;
+		return `${composed}${nullable}`;
 	}
 
 	// Handle enums as union types
@@ -274,37 +316,13 @@ export function getTypeFromSchema(
 				return `Array<${itemType}>${nullable}`;
 			}
 
-			case "object":
-				// Handle objects with defined properties
-				if (schema.properties) {
-					const properties = Object.entries(schema.properties)
-						.map(([key, prop]) => {
-							const isRequired = schema.required?.includes(key);
-							const propertyType = getTypeFromSchema(prop);
-							const safeName = sanitizePropertyName(key);
-							const isDeprecated = "deprecated" in prop && prop.deprecated;
-							const hasDescription = "description" in prop && prop.description;
-							const desc =
-								hasDescription || isDeprecated
-									? `/**${hasDescription ? `\n * ${prop.description}` : ""}${isDeprecated ? "\n * @deprecated" : ""}\n */\n`
-									: "";
-							return `${desc}${safeName}${isRequired ? "" : "?"}: ${propertyType};`;
-						})
-						.join("\n");
-					return `{${properties}\n}${nullable}`;
-				}
-
-				// Handle objects with additionalProperties
-				if (schema.additionalProperties) {
-					const valueType =
-						typeof schema.additionalProperties === "boolean"
-							? "unknown"
-							: getTypeFromSchema(schema.additionalProperties);
-					return `Record<string, ${valueType}>${nullable}`;
-				}
+			case "object": {
+				const fragment = getOwnObjectFragment(schema);
+				if (fragment) return `${fragment}${nullable}`;
 
 				// Default object type when no properties specified
 				return `Record<string, unknown>${nullable}`;
+			}
 
 			default:
 				return `unknown${nullable}`;
