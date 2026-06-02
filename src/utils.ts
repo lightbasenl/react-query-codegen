@@ -272,11 +272,20 @@ export function getTypeFromSchema(
 	if ("enum" in schema && schema.enum) {
 		// Filter out null/undefined enum values (some specs include null for nullable enums)
 		const enumValues = Object.values(schema.enum);
-		const hasNull = enumValues.some((e) => e === null);
-		const nullSuffix = hasNull ? " | null" : "";
-		const values = enumValues.filter((e) => e != null).map((e) => (typeof e === "string" ? `'${e}'` : e));
-		if (values.length === 0) return `unknown${nullable}`;
-		return values.join(" | ") + nullSuffix + nullable;
+		// Only build a literal union when every member is a primitive. Some specs
+		// (e.g. API Platform / PHP backed enums) emit objects as enum members, which
+		// can't form a literal union — joining them yields "[object Object]". In that
+		// case fall through to the declared `type` below for a safe result.
+		const allPrimitive = enumValues.every(
+			(e) => e === null || typeof e === "string" || typeof e === "number" || typeof e === "boolean"
+		);
+		if (allPrimitive) {
+			const hasNull = enumValues.some((e) => e === null);
+			const nullSuffix = hasNull ? " | null" : "";
+			const values = enumValues.filter((e) => e != null).map((e) => (typeof e === "string" ? `'${e}'` : e));
+			if (values.length === 0) return `unknown${nullable}`;
+			return values.join(" | ") + nullSuffix + nullable;
+		}
 	}
 
 	// Handle types based on the "type" property
